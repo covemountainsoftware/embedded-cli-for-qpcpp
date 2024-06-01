@@ -6,4 +6,4 @@ target_include_directories(hwLockCtrlService PUBLIC include)
 
 # TODO: setting up QP should probably be a higher level build option
 include_directories(${QP_CPP_INCLUDE_DIR})
-include(${EXTERNALS_TOP_DIR}/qpcppPosixPortCMakeSupport.txt)
+include(${CMS_CMAKE_DIR}/qpcppPosixPortCMakeSupport.cmake)

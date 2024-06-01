@@ -1,3 +1,6 @@
 [submodule "externals/qpcpp"]
 	path = externals/qpcpp
 	url = https://github.com/QuantumLeaps/qpcpp.git
+[submodule "externals/cpputest-for-qpcpp"]
+	path = externals/cpputest-for-qpcpp
+	url = https://github.com/covemountainsoftware/cpputest-for-qpcpp.git
