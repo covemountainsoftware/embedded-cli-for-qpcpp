@@ -28,7 +28,7 @@
 #include "hwLockCtrlSelfTestEvent.hpp"
 #include "pingPongEvents.hpp"
 #include "bspTicks.hpp"
-#include "qassert.h"
+#include "qsafe.h"
 
 Q_DEFINE_THIS_MODULE("hwLockCtrlService");
 
@@ -194,16 +194,14 @@ void Service::performSelfTest()
     //
     //  https://covemountainsoftware.com/2020/03/08/uml-statechart-handling-errors-when-entering-a-state/
     //
-    static const QP::QEvt event = {REQUEST_GOTO_HISTORY, 0U, 0U};
+    static const QP::QEvt event = QP::QEvt(REQUEST_GOTO_HISTORY);
     postLIFO(&event);
 }
 
 void Service::notifyChangedState(Service::LockState state)
 {
-    static const QP::QEvt lockedEvent = {HW_LOCK_CTRL_SERVICE_IS_LOCKED_SIG, 0U,
-                                         0U};
-    static const QP::QEvt unlockedEvent = {HW_LOCK_CTRL_SERVICE_IS_UNLOCKED_SIG,
-                                           0U, 0U};
+    static const QP::QEvt lockedEvent = QP::QEvt(HW_LOCK_CTRL_SERVICE_IS_LOCKED_SIG);
+    static const QP::QEvt unlockedEvent = QP::QEvt(HW_LOCK_CTRL_SERVICE_IS_UNLOCKED_SIG);
 
     switch (state) {
         case LockState::LOCKED:

@@ -37,7 +37,7 @@ class SelfTestEvent : public QP::QEvt {
 public:
     SelfTestResult m_result;
 
-    explicit SelfTestEvent(SelfTestResult result) : QP::QEvt(), m_result(result)
+    explicit SelfTestEvent(enum_t sig, SelfTestResult result) : QP::QEvt(sig), m_result(result)
     {
     }
 

@@ -54,6 +54,13 @@ public:
 ///          event.
 class Pong : public QP::QEvt {
 public:
+    explicit constexpr Pong(enum_t s) noexcept
+        : QP::QEvt(s),
+        m_source(nullptr)
+    {
+
+    }
+
     QP::QActive* m_source;
 
     static void sendTo(QP::QActive* destination, enum_t pongSig,

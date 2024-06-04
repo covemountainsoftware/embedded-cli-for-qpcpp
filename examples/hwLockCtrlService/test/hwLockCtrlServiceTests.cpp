@@ -319,8 +319,7 @@ TEST(HwLockCtrlServiceTests,
 TEST(HwLockCtrlServiceTests,
      given_test_assert_event_will_assert_and_can_be_tested)
 {
-    static const QP::QEvt assertCausingEvent {DEMONSTRATE_TEST_OF_QASSERT, 0,
-                                              0};
+    static const QP::QEvt assertCausingEvent  = QP::QEvt(DEMONSTRATE_TEST_OF_QASSERT);
 
     startServiceToLocked();
 
@@ -340,9 +339,7 @@ TEST(HwLockCtrlServiceTests, the_service_responds_to_a_ping_with_a_pong)
     // this test demonstrates testing an AO that must respond directly
     // to an event with a POST directly to an external requesting AO.
 
-    Pong pongEvent;
-    pongEvent.sig      = 0;
-    pongEvent.m_source = nullptr;
+    Pong pongEvent(0);
 
     auto dummy = std::unique_ptr<cms::DefaultDummyActiveObject>(
       new cms::DefaultDummyActiveObject());
