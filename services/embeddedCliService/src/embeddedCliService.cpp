@@ -14,12 +14,15 @@
 
 #include "embeddedCliService.hpp"
 #include "pubsub_signals.hpp"
+#include "qsafe.h"
 
 //include the embedded-cli with implementation flag,
 //which pulls the actual CLI implementation into this source
 //code file.
 #define EMBEDDED_CLI_IMPL
 #include "embedded_cli.h"
+
+Q_DEFINE_THIS_MODULE("EmbeddedCliService")
 
 namespace cms {
 namespace EmbeddedCli {
@@ -53,9 +56,12 @@ Q_STATE_DEF(Service, inactive)
     return rtn;
 }
 
-void Service::BeginCliAsync()
+void Service::BeginCliAsync(cms::interfaces::CharacterDevice* charDevice)
 {
-    //todo
+    Q_ASSERT(charDevice != nullptr);
+    auto e = Q_NEW(BeginEvent, BEGIN_CLI);
+    e->m_charDevice = charDevice;
+    this->POST(e, 0);
 }
 
 } //namespace EmbeddedCli

@@ -18,6 +18,7 @@
 #include "cmsTestPublishedEventRecorder.hpp"
 #include "pubsub_signals.hpp"
 #include "bspTicks.hpp"
+#include "mockCharacterDevice.hpp"
 
 // the cpputest headers must always be last
 #include "CppUTest/TestHarness.h"
@@ -119,7 +120,9 @@ TEST(EmbeddedCliServiceTests, writes_data_to_char_device_after_default_activatio
     //determine how many bytes will be written as an experiment.
     mock("CharacterDevice").expectNCalls(10, "WriteAsync");
     mock().ignoreOtherCalls();
-    mUnderTest->BeginCliAsync();
+
+    auto myMock = new cms::mocks::MockCharacterDevice();
+    mUnderTest->BeginCliAsync(myMock);
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
 }
