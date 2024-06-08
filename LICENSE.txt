@@ -1,10 +1,8 @@
-The software supporting this CppUTest port of the 
-QP/C++ Real-Time Embedded Framework is licensed under a 
-dual-licensing model. Most of the files present in this
-repository are only needed for host PC based test execution.
-However, a few of the examples and files may find their way
-into a product's build. To request a commercial
-license see contact information below.
+The port of the embedded-cli to a QP/C++ active object
+is offered for free, under the MIT license.
+
+All other libraries or source code employed by this project
+remain licensed under their respective licensing terms.
 
 Contact Information:
 ====================
