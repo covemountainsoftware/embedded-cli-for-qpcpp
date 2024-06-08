@@ -43,7 +43,6 @@ Q_STATE_DEF(Service, inactive)
     switch (e->sig) {
         case Q_ENTRY_SIG:
             QP::QF::PUBLISH(&inactiveEvent, this);
-
             rtn = Q_RET_HANDLED;
             break;
         default:
@@ -52,6 +51,11 @@ Q_STATE_DEF(Service, inactive)
     }
 
     return rtn;
+}
+
+void Service::BeginCliAsync()
+{
+    //todo
 }
 
 } //namespace EmbeddedCli

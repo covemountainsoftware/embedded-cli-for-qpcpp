@@ -16,6 +16,7 @@
 #define EMBEDDED_CLI_FOR_QPCPP_EMBEDDEDCLISERVICE_HPP
 
 #include "qpcpp.hpp"
+#include "pubsub_signals.hpp"
 
 namespace cms {
 namespace EmbeddedCli {
@@ -30,10 +31,21 @@ public:
     Service(Service&&)                 = delete;
     Service& operator=(Service&&)      = delete;
 
+    /**
+     * When higher level code is ready for the CLI
+     * to begin full operations, call this method,
+     * which will post the appropriate message
+     * to the AO to get the CLI up and running.
+     */
+    void BeginCliAsync();
+
 private:
+    enum InternalSignals {
+        BEGIN_CLI = PubSub::MAX_PUB_SIG
+    };
+
     Q_STATE_DECL(initial);
     Q_STATE_DECL(inactive);
-
 };
 
 } //namespace EmbeddedCli

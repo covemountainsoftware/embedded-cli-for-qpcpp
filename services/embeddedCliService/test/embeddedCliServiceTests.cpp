@@ -106,3 +106,20 @@ TEST(EmbeddedCliServiceTests, writes_no_data_to_char_device_during_startup)
     startService();
     mock().checkExpectations();
 }
+
+TEST(EmbeddedCliServiceTests, writes_data_to_char_device_after_default_activation)
+{
+    using namespace cms::test;
+
+    startService();
+    mock().checkExpectations();
+
+    //the number of bytes written will depend on the behavior of the internal
+    //embedded-cli. Therefore, this test is a bit fragile, and we will have to
+    //determine how many bytes will be written as an experiment.
+    mock("CharacterDevice").expectNCalls(10, "WriteAsync");
+    mock().ignoreOtherCalls();
+    mUnderTest->BeginCliAsync();
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
+}
