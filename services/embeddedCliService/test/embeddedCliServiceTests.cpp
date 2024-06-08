@@ -56,6 +56,7 @@ TEST_GROUP(EmbeddedCliServiceTests)
         mUnderTest->start(qf_ctrl::UNIT_UNDER_TEST_PRIORITY,
                           testQueueStorage.data(), testQueueStorage.size(),
                           nullptr, 0U);
+        qf_ctrl::ProcessEvents();
     }
 };
 
@@ -66,4 +67,22 @@ TEST(EmbeddedCliServiceTests, when_created_and_initialized_does_not_crash)
     //If this happens without any asserts or crashes, then
     //the test is passing.
     startService();
+}
+
+TEST(EmbeddedCliServiceTests, writes_no_data_to_char_device_during_startup)
+{
+    //I like a service to perform minimal initialization
+    //and instead wait for some signal to begin its
+    //real ongoing work. This allows some higher level
+    //application logic to precisely control the
+    //system's overall startup order.
+
+    //Just looking at the embedded-cli, looks like
+    //once it is running it will print a greetings
+    //message. So, I'll test this by ensuring
+    //no bytes are written to the UART yet.
+
+    mock("CharacterDevice").expectNoCall("WriteAsync");
+    startService();
+    mock().checkExpectations();
 }
