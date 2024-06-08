@@ -41,7 +41,7 @@ Q_STATE_DEF(Service, common)
 
     //TODO
 
-    return Q_RET_HANDLED;
+    return super(&top);
 }
 
 } //namespace EmbeddedCli
