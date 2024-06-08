@@ -1,6 +1,6 @@
-# CppUTest for the QP/C++ (qpcpp) Examples Test Project
+# embedded-cli for the QP/C++ (qpcpp) Project
 
-Build and Test status: ![Build and Tests](https://github.com/covemountainsoftware/cpputest-for-qpcpp/actions/workflows/cmake.yml/badge.svg)
+Build and Test status: ![Build and Tests](https://github.com/covemountainsoftware/embedded-cli-for-qpcpp/actions/workflows/cmake.yml/badge.svg)
 
 Copyright Matthew Eshleman
 
@@ -14,26 +14,30 @@ encourage and support efforts like this. Thank you!
 
 The `cpputest-for-qpcpp` project enables CppUTest for the 
 QP/C++ Real-Time Embedded Framework, and is maintained in a separate repository.
-This particular repository holds a top-level example project showing one possible method
-for importing the separate library project and one or more example active objects under test.
+
+This particular repository provides an embedded CLI example using the embedded-cli. 
+
 For more details, please see https://github.com/covemountainsoftware/cpputest-for-qpcpp
+
+For more details on the embedded-cli, see https://github.com/funbiscuit/embedded-cli
 
 # Environment
 
 This project was developed and proven in Ubuntu 20.04 and 22.04. In theory any 
-build or host operating system environment supported by CppUTest will 
+build or host operating system environment supported by CppUTest and QP/C++ will 
 be compatible with this code.
 
 ## Prerequisites
 * CMake and associated build tools were used to develop
   and prove out this project.
 * cpputest-for-qpcpp library, pulled in as a separate git submodule
+* embedded-cli (https://github.com/funbiscuit/embedded-cli/releases/tag/v0.1.4), header file only directly included within this project
 * qpcpp (pulled in as a separate git submodule)
   * After cloning this repository, do not forget to:
   * `git submodule init`
   * `git submodule update` 
 * CppUTest (version 3.8-7 or version 4.0) (3.8 is the default in Ubuntu 20.04 while 4.0 is the default in Ubuntu 22.04)
-* This project requires support for C++14 and C11.
+* This project requires support for C++14 and/or C11.
 
 ## Continuous Integration
 
@@ -45,8 +49,10 @@ See the configuration at: `.github/workflows/cmake.yml`
 
 # License
 
-All code in this project found in the `cms` namespace follows a dual-license approach.
-Please see LICENSE.txt for details.
+The example cli active object is offered for free via the MIT license.
+
+The `cpputest-for-qpcpp` project is offered under a dual-license. See that
+project for details.
 
 All licenses for external source code and libraries relied upon by this project 
 remain fully owned by their respective owners. In particular, please
@@ -61,15 +67,6 @@ and support this effort. Thank you!
 
 This project is a top-level example project which utilizes `cpputest-for-qpcpp`. 
 See https://github.com/covemountainsoftware/cpputest-for-qpcpp
-
-This project is the QP/C port of an earlier equivalent effort for QP/C++. 
-See `cpputest-for-qpcpp` at: https://github.com/covemountainsoftware/cpputest-for-qpcpp
-
-This project was also inspired by a non-qpc example, see this blog post:
-https://covemountainsoftware.com/2020/04/17/unit-testing-active-objects-and-state-machines/
-
-Additionally, please see that post's associated github repo:
-https://github.com/covemountainsoftware/activeObjectUnitTestingDemo
 
 Other references:
 * Sutter, Herb. Prefer Using Active Objects Instead of Naked Threads. Dr. Dobbs, June 2010.
