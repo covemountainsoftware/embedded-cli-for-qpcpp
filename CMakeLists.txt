@@ -22,4 +22,4 @@ set(DRIVERS_TOP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/drivers)
 set(QP_CPP_INCLUDE_DIR ${CMS_QPC_TOP_DIR}/include)
 
 add_subdirectory(drivers)
-add_subdirectory(examples)
+add_subdirectory(services)
