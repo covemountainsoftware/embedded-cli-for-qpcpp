@@ -15,6 +15,7 @@
 #include "embeddedCliService.hpp"
 #include <array>
 #include "cms_cpputest_qf_ctrl.hpp"
+#include "cmsTestPublishedEventRecorder.hpp"
 #include "pubsub_signals.hpp"
 #include "bspTicks.hpp"
 
@@ -29,13 +30,15 @@ static std::array<QP::QEvt const*, 10> testQueueStorage;
 TEST_GROUP(EmbeddedCliServiceTests)
 {
     EmbeddedCli::Service* mUnderTest = nullptr;
+    test::PublishedEventRecorder* mRecorder = nullptr;
 
     void setup() final
     {
         using namespace cms::test;
 
         qf_ctrl::Setup(PubSub::MAX_PUB_SIG, bsp::TICKS_PER_SECOND);
-
+        mRecorder = cms::test::PublishedEventRecorder::CreatePublishedEventRecorder(
+          qf_ctrl::RECORDER_PRIORITY, QP::Q_USER_SIG, PubSub::MAX_PUB_SIG);
         mUnderTest = new EmbeddedCli::Service();
     }
 
@@ -44,9 +47,9 @@ TEST_GROUP(EmbeddedCliServiceTests)
         using namespace cms::test;
 
         delete mUnderTest;
-
         mock().clear();
         qf_ctrl::Teardown();
+        delete mRecorder;
     }
 
     void startService() const
@@ -67,6 +70,23 @@ TEST(EmbeddedCliServiceTests, when_created_and_initialized_does_not_crash)
     //If this happens without any asserts or crashes, then
     //the test is passing.
     startService();
+}
+
+
+TEST(EmbeddedCliServiceTests, after_initial_init_emits_inactive_signal)
+{
+    //I like a service to perform minimal initialization
+    //and instead wait for some signal to begin its
+    //real ongoing work. This allows some higher level
+    //application logic to precisely control the
+    //system's overall startup order.
+
+    //For convenience during testing, I'm going to have the AO
+    //publish an inactive event, which will be useful during
+    //testing and would likely be useful to users of this service
+    //too.
+    startService();
+    CHECK_TRUE(mRecorder->isSignalRecorded(PubSub::EMBEDDED_CLI_INACTIVE_SIG));
 }
 
 TEST(EmbeddedCliServiceTests, writes_no_data_to_char_device_during_startup)

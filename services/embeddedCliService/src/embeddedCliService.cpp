@@ -13,6 +13,7 @@
 /// @endcond
 
 #include "embeddedCliService.hpp"
+#include "pubsub_signals.hpp"
 
 //include the embedded-cli with implementation flag,
 //which pulls the actual CLI implementation into this source
@@ -31,17 +32,26 @@ Service::Service() :
 Q_STATE_DEF(Service, initial)
 {
     (void)e;
-
-    return tran(&common);
+    return tran(&inactive);
 }
 
-Q_STATE_DEF(Service, common)
+Q_STATE_DEF(Service, inactive)
 {
-    (void)e;
+    static const QP::QEvt inactiveEvent = QP::QEvt(PubSub::EMBEDDED_CLI_INACTIVE_SIG);
 
-    //TODO
+    QP::QState rtn;
+    switch (e->sig) {
+        case Q_ENTRY_SIG:
+            QP::QF::PUBLISH(&inactiveEvent, this);
 
-    return super(&top);
+            rtn = Q_RET_HANDLED;
+            break;
+        default:
+            rtn = super(&top);
+            break;
+    }
+
+    return rtn;
 }
 
 } //namespace EmbeddedCli

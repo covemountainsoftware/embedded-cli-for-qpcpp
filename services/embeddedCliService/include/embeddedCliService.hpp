@@ -32,7 +32,7 @@ public:
 
 private:
     Q_STATE_DECL(initial);
-    Q_STATE_DECL(common);
+    Q_STATE_DECL(inactive);
 
 };
 

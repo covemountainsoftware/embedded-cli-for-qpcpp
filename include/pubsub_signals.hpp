@@ -13,6 +13,8 @@ namespace PubSub {
 enum Signals {
     STARTING_PUB_SUB_SIG = QP::Q_USER_SIG,
 
+    #include "../services/embeddedCliService/include/embeddedCliServicePubSubSignals.hpp"
+
     MAX_PUB_SIG   // the last published signal
 };
 
