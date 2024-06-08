@@ -13,10 +13,6 @@ namespace PubSub {
 enum Signals {
     STARTING_PUB_SUB_SIG = QP::Q_USER_SIG,
 
-    #include "hwLockCtrlServiceExpectedPubSubSigs.hpp"
-
-    DEMONSTRATE_TEST_OF_QASSERT,
-
     MAX_PUB_SIG   // the last published signal
 };
 
