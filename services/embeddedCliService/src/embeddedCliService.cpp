@@ -25,11 +25,27 @@
 Q_DEFINE_THIS_MODULE("EmbeddedCliService")
 
 namespace cms {
-namespace EmbeddedCli {
+namespace EmbeddedCLI {
+
 
 Service::Service() :
-    QP::QActive(initial)
+    QP::QActive(initial),
+    mCharacterDevice(nullptr),
+    mEmbeddedCliConfig(nullptr),
+    mEmbeddedCli(nullptr)
 {
+}
+
+Service::~Service()
+{
+    if (mEmbeddedCli)
+    {
+        embeddedCliFree(mEmbeddedCli);
+    }
+
+    mEmbeddedCli = nullptr;
+    mEmbeddedCliConfig = nullptr;
+    mCharacterDevice = nullptr;
 }
 
 Q_STATE_DEF(Service, initial)
@@ -48,6 +64,36 @@ Q_STATE_DEF(Service, inactive)
             QP::QF::PUBLISH(&inactiveEvent, this);
             rtn = Q_RET_HANDLED;
             break;
+        case BEGIN_CLI_SIG: {
+            auto beginEvent  = reinterpret_cast<const BeginEvent*>(e);
+            mCharacterDevice = beginEvent->m_charDevice;
+            rtn              = tran(&active);
+        }
+            break;
+        default:
+            rtn = super(&top);
+            break;
+    }
+
+    return rtn;
+}
+
+Q_STATE_DEF(Service, active)
+{
+    QP::QState rtn;
+    switch (e->sig) {
+        case Q_ENTRY_SIG:
+            mEmbeddedCliConfig = embeddedCliDefaultConfig();
+            mEmbeddedCli = embeddedCliNew(mEmbeddedCliConfig);
+            mEmbeddedCli->appContext = this;
+            mEmbeddedCli->writeChar = &Service::CliWriteChar;
+            embeddedCliProcess(mEmbeddedCli);
+            rtn = Q_RET_HANDLED;
+            break;
+        case BEGIN_CLI_SIG:
+            //we are already active, drop this Begin request
+            rtn = Q_RET_HANDLED;
+            break;
         default:
             rtn = super(&top);
             break;
@@ -59,10 +105,25 @@ Q_STATE_DEF(Service, inactive)
 void Service::BeginCliAsync(cms::interfaces::CharacterDevice* charDevice)
 {
     Q_ASSERT(charDevice != nullptr);
-    auto e = Q_NEW(BeginEvent, BEGIN_CLI);
+    auto e = Q_NEW(BeginEvent, BEGIN_CLI_SIG);
     e->m_charDevice = charDevice;
     this->POST(e, 0);
 }
 
-} //namespace EmbeddedCli
+void Service::CliWriteChar(EmbeddedCli *embeddedCli, char c)
+{
+    auto me = static_cast<Service*>(embeddedCli->appContext);
+
+    if ((me != nullptr) && (me->mCharacterDevice != nullptr))
+    {
+        me->mCharacterDevice->WriteAsync(static_cast<uint8_t>(c));
+    }
+    else
+    {
+        Q_ASSERT(me != nullptr);
+        Q_ASSERT(me->mCharacterDevice != nullptr);
+    }
+}
+
+} //namespace EmbeddedCLI
 } //namespace cms

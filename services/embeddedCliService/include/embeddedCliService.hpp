@@ -19,23 +19,22 @@
 #include "pubsub_signals.hpp"
 #include "characterDeviceInterface.hpp"
 
+//forward declare the third-party EmbeddedCli structs
+struct EmbeddedCli;
+struct EmbeddedCliConfig;
+
 namespace cms {
-namespace EmbeddedCli {
+namespace EmbeddedCLI { //note, all caps CLI needed to avoid conflicts
 
 class Service final : public QP::QActive {
 public:
     Service();
-    ~Service() = default;
+    ~Service();
 
     Service(const Service&)            = delete;
     Service& operator=(const Service&) = delete;
     Service(Service&&)                 = delete;
     Service& operator=(Service&&)      = delete;
-
-    /**
-     *
-     */
-
 
     /**
      * When higher level code is ready for the CLI
@@ -49,22 +48,24 @@ public:
 
 private:
     enum InternalSignals {
-        BEGIN_CLI = PubSub::MAX_PUB_SIG
+        BEGIN_CLI_SIG = PubSub::MAX_PUB_SIG
     };
 
     class BeginEvent : public QP::QEvt {
     public:
         cms::interfaces::CharacterDevice* m_charDevice;
-
-        explicit BeginEvent(enum_t sig, cms::interfaces::CharacterDevice* charDevice) :
-            QP::QEvt(sig),
-            m_charDevice(charDevice)
-        {
-        }
     };
 
+    //Active Object States
     Q_STATE_DECL(initial);
     Q_STATE_DECL(inactive);
+    Q_STATE_DECL(active);
+
+    static void CliWriteChar(EmbeddedCli *embeddedCli, char c);
+
+    cms::interfaces::CharacterDevice* mCharacterDevice;
+    EmbeddedCliConfig * mEmbeddedCliConfig;
+    EmbeddedCli * mEmbeddedCli;
 };
 
 } //namespace EmbeddedCli
