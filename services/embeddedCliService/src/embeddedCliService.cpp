@@ -55,7 +55,7 @@ Q_STATE_DEF(Service, initial)
 
 Q_STATE_DEF(Service, inactive)
 {
-    static const QP::QEvt inactiveEvent = QP::QEvt(PubSub::EMBEDDED_CLI_INACTIVE_SIG);
+    static const QP::QEvt inactiveEvent = QP::QEvt(EMBEDDED_CLI_INACTIVE_SIG);
 
     QP::QState rtn;
     switch (e->sig) {

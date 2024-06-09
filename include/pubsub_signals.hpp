@@ -7,17 +7,13 @@
 
 #include "qpcpp.hpp"
 
-namespace PubSub {
-
 /// The publish/subscribe signals allocated for this project
-enum Signals {
+enum PubSubSignals {
     STARTING_PUB_SUB_SIG = QP::Q_USER_SIG,
 
-    #include "../services/embeddedCliService/include/embeddedCliServicePubSubSignals.hpp"
+    #include "embeddedCliServicePubSubSignals.hpp"
 
-    MAX_PUB_SIG   // the last published signal
+    MAX_PUB_SUB_SIG   // the last published signal
 };
-
-}   // namespace PubSub
 
 #endif   // PUB_SUB_SIGNALS_HPP

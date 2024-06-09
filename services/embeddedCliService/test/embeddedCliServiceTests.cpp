@@ -38,9 +38,9 @@ TEST_GROUP(EmbeddedCliServiceTests)
     {
         using namespace cms::test;
 
-        qf_ctrl::Setup(PubSub::MAX_PUB_SIG, bsp::TICKS_PER_SECOND);
+        qf_ctrl::Setup(MAX_PUB_SUB_SIG, bsp::TICKS_PER_SECOND);
         mRecorder = cms::test::PublishedEventRecorder::CreatePublishedEventRecorder(
-          qf_ctrl::RECORDER_PRIORITY, QP::Q_USER_SIG, PubSub::MAX_PUB_SIG);
+          qf_ctrl::RECORDER_PRIORITY, QP::Q_USER_SIG, MAX_PUB_SUB_SIG);
 
         mMockCharacterDevice = new cms::mocks::MockCharacterDevice();
         mUnderTest = new EmbeddedCLI::Service();
@@ -65,6 +65,7 @@ TEST_GROUP(EmbeddedCliServiceTests)
                           testQueueStorage.data(), testQueueStorage.size(),
                           nullptr, 0U);
         qf_ctrl::ProcessEvents();
+        mock().checkExpectations();
     }
 };
 
@@ -91,7 +92,7 @@ TEST(EmbeddedCliServiceTests, after_initial_init_emits_inactive_signal)
     //testing and would likely be useful to users of this service
     //too.
     startService();
-    CHECK_TRUE(mRecorder->isSignalRecorded(PubSub::EMBEDDED_CLI_INACTIVE_SIG));
+    CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_INACTIVE_SIG));
 }
 
 TEST(EmbeddedCliServiceTests, writes_no_data_to_char_device_during_startup)
@@ -109,15 +110,12 @@ TEST(EmbeddedCliServiceTests, writes_no_data_to_char_device_during_startup)
 
     mock("CharacterDevice").expectNoCall("WriteAsync");
     startService();
-    mock().checkExpectations();
 }
 
 TEST(EmbeddedCliServiceTests, writes_data_to_char_device_after_default_activation)
 {
     using namespace cms::test;
-
     startService();
-    mock().checkExpectations();
 
     //We expect the default output of a new CLI to be: "> "
     mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", '>');

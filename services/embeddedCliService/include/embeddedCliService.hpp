@@ -58,7 +58,7 @@ public:
 
 private:
     enum InternalSignals {
-        BEGIN_CLI_SIG = PubSub::MAX_PUB_SIG
+        BEGIN_CLI_SIG = MAX_PUB_SUB_SIG
     };
 
     class BeginEvent : public QP::QEvt {
