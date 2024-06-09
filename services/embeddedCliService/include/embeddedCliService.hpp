@@ -58,12 +58,18 @@ public:
 
 private:
     enum InternalSignals {
-        BEGIN_CLI_SIG = MAX_PUB_SUB_SIG
+        BEGIN_CLI_SIG = MAX_PUB_SUB_SIG,
+        NEW_CLI_DATA_SIG
     };
 
     class BeginEvent : public QP::QEvt {
     public:
-        cms::interfaces::CharacterDevice* m_charDevice;
+        cms::interfaces::CharacterDevice* mCharDevice;
+    };
+
+    class NewDataEvent : public QP::QEvt {
+    public:
+       uint8_t mByte;
     };
 
     //Active Object States
@@ -72,6 +78,7 @@ private:
     Q_STATE_DECL(active);
 
     static void CliWriteChar(EmbeddedCli *embeddedCli, char c);
+    static void NewByteReceived(void* userData, uint8_t byte);
 
     cms::interfaces::CharacterDevice* mCharacterDevice;
     EmbeddedCliConfig * mEmbeddedCliConfig;
