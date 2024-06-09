@@ -32,6 +32,7 @@ TEST_GROUP(EmbeddedCliServiceTests)
 {
     EmbeddedCLI::Service* mUnderTest = nullptr;
     test::PublishedEventRecorder* mRecorder = nullptr;
+    cms::mocks::MockCharacterDevice* mMockCharacterDevice = nullptr;
 
     void setup() final
     {
@@ -40,6 +41,8 @@ TEST_GROUP(EmbeddedCliServiceTests)
         qf_ctrl::Setup(PubSub::MAX_PUB_SIG, bsp::TICKS_PER_SECOND);
         mRecorder = cms::test::PublishedEventRecorder::CreatePublishedEventRecorder(
           qf_ctrl::RECORDER_PRIORITY, QP::Q_USER_SIG, PubSub::MAX_PUB_SIG);
+
+        mMockCharacterDevice = new cms::mocks::MockCharacterDevice();
         mUnderTest = new EmbeddedCLI::Service();
     }
 
@@ -51,6 +54,7 @@ TEST_GROUP(EmbeddedCliServiceTests)
         mock().clear();
         qf_ctrl::Teardown();
         delete mRecorder;
+        delete mMockCharacterDevice;
     }
 
     void startService() const
@@ -115,15 +119,12 @@ TEST(EmbeddedCliServiceTests, writes_data_to_char_device_after_default_activatio
     startService();
     mock().checkExpectations();
 
-    //the number of bytes written will depend on the behavior of the internal
-    //embedded-cli. Therefore, this test is a bit fragile, and we will have to
-    //determine how many bytes will be written as an experiment.
-    mock("CharacterDevice").expectNCalls(2, "WriteAsync").ignoreOtherParameters();
+    //We expect the default output of a new CLI to be: "> "
+    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", '>');
+    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", ' ');
     mock().ignoreOtherCalls();
 
-    auto myMock = new cms::mocks::MockCharacterDevice();
-    mUnderTest->BeginCliAsync(myMock);
+    mUnderTest->BeginCliAsync(mMockCharacterDevice);
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
-    delete myMock;
 }

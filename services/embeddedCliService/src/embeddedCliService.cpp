@@ -27,7 +27,6 @@ Q_DEFINE_THIS_MODULE("EmbeddedCliService")
 namespace cms {
 namespace EmbeddedCLI {
 
-
 Service::Service() :
     QP::QActive(initial),
     mCharacterDevice(nullptr),

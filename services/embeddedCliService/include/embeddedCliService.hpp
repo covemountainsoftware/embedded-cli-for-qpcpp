@@ -26,6 +26,13 @@ struct EmbeddedCliConfig;
 namespace cms {
 namespace EmbeddedCLI { //note, all caps CLI needed to avoid conflicts
 
+/**
+ * The EmbeddedCLI::Service creates a command line interface
+ * using a provided character device.
+ *
+ * Internally uses the third party library 'embedded-cli'
+ * available at: https://github.com/funbiscuit/embedded-cli
+ */
 class Service final : public QP::QActive {
 public:
     Service();
@@ -43,6 +50,9 @@ public:
      * to the AO to get the CLI up and running.
      *
      * @param charDevice - the character device to use
+     *
+     * @note: Will use the embedded-cli's default configuration
+     *        which will allocate memory via malloc.
      */
     void BeginCliAsync(cms::interfaces::CharacterDevice* charDevice);
 
