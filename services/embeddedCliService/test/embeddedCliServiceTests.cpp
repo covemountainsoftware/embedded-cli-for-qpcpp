@@ -14,6 +14,7 @@
 
 #include "embeddedCliService.hpp"
 #include <array>
+#include <vector>
 #include "cms_cpputest_qf_ctrl.hpp"
 #include "cmsTestPublishedEventRecorder.hpp"
 #include "pubsub_signals.hpp"
@@ -27,6 +28,8 @@
 using namespace cms;
 
 static std::array<QP::QEvt const*, 10> testQueueStorage;
+
+using Bytes = std::vector<uint8_t>;
 
 TEST_GROUP(EmbeddedCliServiceTests)
 {
@@ -79,6 +82,14 @@ TEST_GROUP(EmbeddedCliServiceTests)
         qf_ctrl::ProcessEvents();
         mock().checkExpectations();
         CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_ACTIVE_SIG));
+    }
+
+    static void mockExpectWritesToCharacterDevice(const Bytes& expectedWrites)
+    {
+        for (uint8_t byte : expectedWrites)
+        {
+            mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", byte);
+        }
     }
 };
 
@@ -161,16 +172,9 @@ TEST(EmbeddedCliServiceTests, upon_receiving_an_empty_linefeed_will_echo_same_an
 {
     using namespace cms::test;
     startServiceToActive();
-    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", '\r');
-    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", '\n');
-    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", '>');
-    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", ' ');
-    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", 0x1b); //esc
-    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", 0x5b); //[
-    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", 0x73); //s
-    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", 0x1b); //esc
-    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", 0x5b); //[
-    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", 0x75); //u
+
+    Bytes expectedWrites = {'\r', '\n', '>', ' ', 0x1b, '[', 's', 0x1b, '[', 'u'};
+    mockExpectWritesToCharacterDevice(expectedWrites);
     mock().ignoreOtherCalls();
 
     //inject characters into our mock character device
