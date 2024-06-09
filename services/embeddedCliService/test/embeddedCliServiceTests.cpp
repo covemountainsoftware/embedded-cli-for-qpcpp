@@ -126,3 +126,17 @@ TEST(EmbeddedCliServiceTests, writes_data_to_char_device_after_default_activatio
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
 }
+
+TEST(EmbeddedCliServiceTests, publishes_an_event_upon_active)
+{
+    using namespace cms::test;
+    startService();
+
+    //only interested in the pub sub event in this test
+    mock().ignoreOtherCalls();
+
+    mUnderTest->BeginCliAsync(mMockCharacterDevice);
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
+    CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_ACTIVE_SIG));
+}
