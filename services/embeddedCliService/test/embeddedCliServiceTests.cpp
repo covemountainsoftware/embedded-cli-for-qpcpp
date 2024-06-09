@@ -66,6 +66,7 @@ TEST_GROUP(EmbeddedCliServiceTests)
                           nullptr, 0U);
         qf_ctrl::ProcessEvents();
         mock().checkExpectations();
+        CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_INACTIVE_SIG));
     }
 };
 
@@ -92,7 +93,10 @@ TEST(EmbeddedCliServiceTests, after_initial_init_emits_inactive_signal)
     //testing and would likely be useful to users of this service
     //too.
     startService();
-    CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_INACTIVE_SIG));
+
+    //NOTE: moved the published event recorder check into startService()
+    //      so that the INACTIVE event is always cleared from the
+    //      recorder for subsequent tests/event recording.
 }
 
 TEST(EmbeddedCliServiceTests, writes_no_data_to_char_device_during_startup)

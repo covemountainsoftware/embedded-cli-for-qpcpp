@@ -79,6 +79,8 @@ Q_STATE_DEF(Service, inactive)
 
 Q_STATE_DEF(Service, active)
 {
+    static const QP::QEvt activeEvent = QP::QEvt(EMBEDDED_CLI_ACTIVE_SIG);
+
     QP::QState rtn;
     switch (e->sig) {
         case Q_ENTRY_SIG:
@@ -87,6 +89,7 @@ Q_STATE_DEF(Service, active)
             mEmbeddedCli->appContext = this;
             mEmbeddedCli->writeChar = &Service::CliWriteChar;
             embeddedCliProcess(mEmbeddedCli);
+            QP::QF::PUBLISH(&activeEvent, this);
             rtn = Q_RET_HANDLED;
             break;
         case BEGIN_CLI_SIG:
