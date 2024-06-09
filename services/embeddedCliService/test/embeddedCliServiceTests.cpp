@@ -68,6 +68,18 @@ TEST_GROUP(EmbeddedCliServiceTests)
         mock().checkExpectations();
         CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_INACTIVE_SIG));
     }
+
+    void startServiceToActive() const
+    {
+        using namespace cms::test;
+
+        startService();
+        mock().ignoreOtherCalls();
+        mUnderTest->BeginCliAsync(mMockCharacterDevice);
+        qf_ctrl::ProcessEvents();
+        mock().checkExpectations();
+        CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_ACTIVE_SIG));
+    }
 };
 
 TEST(EmbeddedCliServiceTests, when_created_and_initialized_does_not_crash)
@@ -116,7 +128,7 @@ TEST(EmbeddedCliServiceTests, writes_no_data_to_char_device_during_startup)
     startService();
 }
 
-TEST(EmbeddedCliServiceTests, writes_data_to_char_device_after_default_activation)
+TEST(EmbeddedCliServiceTests, writes_default_prompt_after_default_activation)
 {
     using namespace cms::test;
     startService();
@@ -143,4 +155,19 @@ TEST(EmbeddedCliServiceTests, publishes_an_event_upon_active)
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
     CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_ACTIVE_SIG));
+}
+
+TEST(EmbeddedCliServiceTests, upon_receiving_an_empty_linefeed_will_echo_same_and_prompt)
+{
+    using namespace cms::test;
+    startServiceToActive();
+    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", '\n');
+    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", '>');
+    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", ' ');
+    mock().ignoreOtherCalls();
+
+    //inject characters into our mock character device
+    mMockCharacterDevice->InjectCharacterSequence("\n");
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
 }

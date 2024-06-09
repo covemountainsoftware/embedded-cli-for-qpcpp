@@ -15,10 +15,14 @@ public:
     virtual ~MockCharacterDevice() = default;
 
     bool WriteAsync(uint8_t byte) override;
-    void RegisterNewByteCallback(void* userData) override;
+    void RegisterNewByteCallback(NewByteCallback callback, void* userData) override;
+
+    //unit test specific access
+    void InjectCharacterSequence(const char * inject);
 
 private:
-
+    NewByteCallback mCallback = nullptr;
+    void* mUserData = nullptr;
 };
 
 } //namespace mocks
