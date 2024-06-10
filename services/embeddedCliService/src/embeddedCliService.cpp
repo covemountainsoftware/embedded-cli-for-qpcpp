@@ -27,13 +27,31 @@ Service::Service(uint64_t* buffer, size_t bufferElementCount, const char * custo
     mCharacterDevice(nullptr),
     mEmbeddedCliConfigBacking(),
     mEmbeddedCliConfig(reinterpret_cast<EmbeddedCliConfig*>(mEmbeddedCliConfigBacking.data())),
-    mBuffer(buffer),
-    mBufferElementCount(bufferElementCount),
-    mEmbeddedCli(nullptr),
-    mCustomInvitation(customInvitation)
+    mEmbeddedCli(nullptr)
 {
     static_assert(sizeof(mEmbeddedCliConfigBacking) >= sizeof(EmbeddedCliConfig),
                   "backing memory for the cli config is not large enough!");
+
+    //one time config setup during construction. Saves on member
+    //variable storage too.
+    *mEmbeddedCliConfig = *embeddedCliDefaultConfig();
+
+    if (buffer != nullptr) {
+        mEmbeddedCliConfig->cliBuffer = buffer;
+        mEmbeddedCliConfig->cliBufferSize = bufferElementCount * sizeof(uint64_t);
+    }
+
+    if (customInvitation != nullptr) {
+        mEmbeddedCliConfig->invitation = customInvitation;
+    }
+
+    // After all configuration items have been set,
+    // make sure our static buffer is large enough, but
+    // only if we are using that option.
+    if (buffer != nullptr) {
+        uint16_t requiredSize = embeddedCliRequiredSize(mEmbeddedCliConfig);
+        Q_ASSERT(requiredSize <= bufferElementCount * sizeof(uint64_t));
+    }
 }
 
 Service::~Service()
@@ -86,29 +104,6 @@ Q_STATE_DEF(Service, active)
     switch (e->sig) {
         case Q_ENTRY_SIG: {
             mCharacterDevice->RegisterNewByteCallback(NewByteReceived, this);
-
-            // Copy the default config to our internal backing.
-            // This should allow for multiple CLI instances.
-            *mEmbeddedCliConfig = *embeddedCliDefaultConfig();
-
-            if (mBuffer != nullptr) {
-                mEmbeddedCliConfig->cliBuffer = mBuffer;
-                mEmbeddedCliConfig->cliBufferSize = mBufferElementCount * sizeof(uint64_t);
-            }
-
-            if (mCustomInvitation != nullptr) {
-                mEmbeddedCliConfig->invitation = mCustomInvitation;
-            }
-
-
-            // After all configuration items have been set,
-            // make sure our static buffer is large enough, but
-            // only if we are using that option.
-            if (mBuffer != nullptr) {
-                uint16_t requiredSize = embeddedCliRequiredSize(mEmbeddedCliConfig);
-                Q_ASSERT(requiredSize <= mBufferElementCount * sizeof(uint64_t));
-            }
-
             mEmbeddedCli = embeddedCliNew(mEmbeddedCliConfig);
             Q_ASSERT(mEmbeddedCli != nullptr);
 

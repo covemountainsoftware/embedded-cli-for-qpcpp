@@ -73,9 +73,7 @@ TEST(EmbeddedCliServiceTestsWithoutMemPoolLeakDetect, service_asserts_if_static_
     using namespace cms::test;
     std::array<uint64_t, 1> staticMemory = {0}; //too small, will cause an assert
 
-    startService(staticMemory.data(), staticMemory.size());
     mock(QASSERT_MOCK_NAME).expectOneCall(ONERROR_FUNC_NAME).ignoreOtherParameters();
-    mUnderTest->BeginCliAsync(mMockCharacterDevice);
-    qf_ctrl::ProcessEvents();
+    startService(staticMemory.data(), staticMemory.size());
     mock().checkExpectations();
 }

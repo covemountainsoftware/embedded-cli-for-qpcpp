@@ -107,10 +107,7 @@ private:
 
     //always points to the backing memory above
     EmbeddedCliConfig * const mEmbeddedCliConfig;
-    uint64_t* const mBuffer;
-    const size_t mBufferElementCount;
     EmbeddedCli * mEmbeddedCli;
-    const char * const mCustomInvitation;
 };
 
 } //namespace EmbeddedCli
