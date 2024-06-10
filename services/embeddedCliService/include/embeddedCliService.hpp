@@ -43,8 +43,10 @@ public:
      * @param buffer - set to nullptr and the internal CLI will malloc
      *                 the necessary buffer
      * @param bufferElementCount - the size of the provided buffer
+     * @param customInvitation - a custom string for the CLI prompt.
+     *                           Set to nullptr for the internal default prompt
      */
-    explicit Service(uint64_t* buffer, size_t bufferElementCount);
+    explicit Service(uint64_t* buffer, size_t bufferElementCount, const char * customInvitation);
     ~Service();
 
     Service(const Service&)            = delete;
@@ -108,6 +110,7 @@ private:
     uint64_t* const mBuffer;
     const size_t mBufferElementCount;
     EmbeddedCli * mEmbeddedCli;
+    const char * const mCustomInvitation;
 };
 
 } //namespace EmbeddedCli

@@ -59,10 +59,10 @@ TEST_GROUP(EmbeddedCliServiceTests)
         delete mMockCharacterDevice;
     }
 
-    void startService(uint64_t* buffer = nullptr, size_t bufferElementCount = 0)
+    void startService(uint64_t* buffer = nullptr, size_t bufferElementCount = 0, const char * customInvitation = nullptr)
     {
         using namespace cms::test;
-        mUnderTest = new EmbeddedCLI::Service(buffer, bufferElementCount);
+        mUnderTest = new EmbeddedCLI::Service(buffer, bufferElementCount, customInvitation);
 
         mUnderTest->start(qf_ctrl::UNIT_UNDER_TEST_PRIORITY,
                           testQueueStorage.data(), testQueueStorage.size(),
@@ -72,11 +72,11 @@ TEST_GROUP(EmbeddedCliServiceTests)
         CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_INACTIVE_SIG));
     }
 
-    void startServiceToActive()
+    void startServiceToActive(const char * customInvitation = nullptr)
     {
         using namespace cms::test;
 
-        startService();
+        startService(nullptr, 0, customInvitation);
         mock().ignoreOtherCalls();
         mUnderTest->BeginCliAsync(mMockCharacterDevice);
         qf_ctrl::ProcessEvents();
@@ -201,4 +201,20 @@ TEST(EmbeddedCliServiceTests, service_supports_static_memory_for_the_cli)
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
     CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_ACTIVE_SIG));
+}
+
+
+TEST(EmbeddedCliServiceTests, service_supports_a_custom_invitation)
+{
+    using namespace cms::test;
+    startServiceToActive("test> ");
+
+    Bytes expectedWrites = {'\r', '\n', 't', 'e', 's', 't', '>', ' ', 0x1b, '[', 's', 0x1b, '[', 'u'};
+    mockExpectWritesToCharacterDevice(expectedWrites);
+    mock().ignoreOtherCalls();
+
+    //inject characters into our mock character device
+    mMockCharacterDevice->InjectCharacterSequence("\n");
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
 }

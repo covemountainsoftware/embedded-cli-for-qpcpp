@@ -57,7 +57,7 @@ TEST_GROUP(EmbeddedCliServiceTestsWithoutMemPoolLeakDetect)
     {
         using namespace cms::test;
 
-        mUnderTest = new EmbeddedCLI::Service(buffer, bufferElementCount);
+        mUnderTest = new EmbeddedCLI::Service(buffer, bufferElementCount, nullptr);
 
         mUnderTest->start(qf_ctrl::UNIT_UNDER_TEST_PRIORITY,
                           testQueueStorage.data(), testQueueStorage.size(),

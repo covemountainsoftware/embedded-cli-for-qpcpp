@@ -22,14 +22,15 @@ Q_DEFINE_THIS_MODULE("EmbeddedCliService")
 namespace cms {
 namespace EmbeddedCLI {
 
-Service::Service(uint64_t* buffer, size_t bufferElementCount) :
+Service::Service(uint64_t* buffer, size_t bufferElementCount, const char * customInvitation) :
     QP::QActive(initial),
     mCharacterDevice(nullptr),
     mEmbeddedCliConfigBacking(),
     mEmbeddedCliConfig(reinterpret_cast<EmbeddedCliConfig*>(mEmbeddedCliConfigBacking.data())),
     mBuffer(buffer),
     mBufferElementCount(bufferElementCount),
-    mEmbeddedCli(nullptr)
+    mEmbeddedCli(nullptr),
+    mCustomInvitation(customInvitation)
 {
     static_assert(sizeof(mEmbeddedCliConfigBacking) >= sizeof(EmbeddedCliConfig),
                   "backing memory for the cli config is not large enough!");
@@ -83,28 +84,41 @@ Q_STATE_DEF(Service, active)
 
     QP::QState rtn;
     switch (e->sig) {
-        case Q_ENTRY_SIG:
+        case Q_ENTRY_SIG: {
             mCharacterDevice->RegisterNewByteCallback(NewByteReceived, this);
 
-            //Copy the default config to our internal backing.
-            //This should allow for multiple CLI instances.
+            // Copy the default config to our internal backing.
+            // This should allow for multiple CLI instances.
             *mEmbeddedCliConfig = *embeddedCliDefaultConfig();
-            if (mBuffer != nullptr)
-            {
-                //make sure the buffer provided is large enough
-                //for the embedded-cli's requirements
-                uint16_t  requiredSize = embeddedCliRequiredSize(mEmbeddedCliConfig);
-                Q_ASSERT(requiredSize <= mBufferElementCount * sizeof(uint64_t));
+
+            if (mBuffer != nullptr) {
                 mEmbeddedCliConfig->cliBuffer = mBuffer;
                 mEmbeddedCliConfig->cliBufferSize = mBufferElementCount * sizeof(uint64_t);
             }
+
+            if (mCustomInvitation != nullptr) {
+                mEmbeddedCliConfig->invitation = mCustomInvitation;
+            }
+
+
+            // After all configuration items have been set,
+            // make sure our static buffer is large enough, but
+            // only if we are using that option.
+            if (mBuffer != nullptr) {
+                uint16_t requiredSize = embeddedCliRequiredSize(mEmbeddedCliConfig);
+                Q_ASSERT(requiredSize <= mBufferElementCount * sizeof(uint64_t));
+            }
+
             mEmbeddedCli = embeddedCliNew(mEmbeddedCliConfig);
+            Q_ASSERT(mEmbeddedCli != nullptr);
+
             mEmbeddedCli->appContext = this;
             mEmbeddedCli->writeChar = &Service::CliWriteChar;
             embeddedCliProcess(mEmbeddedCli);
             QP::QF::PUBLISH(&activeEvent, this);
             rtn = Q_RET_HANDLED;
             break;
+        }
         case BEGIN_CLI_SIG:
             //we are already active, drop this Begin request
             rtn = Q_RET_HANDLED;
