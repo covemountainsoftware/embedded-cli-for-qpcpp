@@ -15,6 +15,9 @@
 #ifndef EMBEDDED_CLI_FOR_QPCPP_EMBEDDEDCLISERVICE_HPP
 #define EMBEDDED_CLI_FOR_QPCPP_EMBEDDEDCLISERVICE_HPP
 
+#include <cstdint>
+#include <cstddef>
+#include <array>
 #include "qpcpp.hpp"
 #include "pubsub_signals.hpp"
 #include "characterDeviceInterface.hpp"
@@ -50,11 +53,17 @@ public:
      * to the AO to get the CLI up and running.
      *
      * @param charDevice - the character device to use
+     * @param buffer - pointer to a statically allocated buffer using
+     *                 uint64. Must be aligned to uint64 boundaries too.
+     * @param bufferElementCount - the number of uint64 elements
+     *                             available at 'buffer'
      *
-     * @note: Will use the embedded-cli's default configuration
+     * @note: If 'buffer' is nullptr, will use the embedded-cli's default configuration
      *        which will allocate memory via malloc.
+     * @note: Using uint64 to ensure all embedded-cli alignment requirements
+     *        are met, regardless of environment.
      */
-    void BeginCliAsync(cms::interfaces::CharacterDevice* charDevice);
+    void BeginCliAsync(cms::interfaces::CharacterDevice* charDevice, uint64_t* buffer = nullptr, size_t bufferElementCount = 0);
 
 private:
     enum InternalSignals {
@@ -65,6 +74,8 @@ private:
     class BeginEvent : public QP::QEvt {
     public:
         cms::interfaces::CharacterDevice* mCharDevice;
+        uint64_t* mBuffer;
+        size_t mBufferElementCount;
     };
 
     class NewDataEvent : public QP::QEvt {
@@ -81,7 +92,17 @@ private:
     static void NewByteReceived(void* userData, uint8_t byte);
 
     cms::interfaces::CharacterDevice* mCharacterDevice;
-    EmbeddedCliConfig * mEmbeddedCliConfig;
+
+    //avoid pulling in embedded-cli header dependencies
+    //this also in-theory allows for multiple CLI AO instances
+    //an internal static_assert protects against future size changes
+    //versus the embedded-cli struct.
+    std::array<uint8_t, 32> mEmbeddedCliConfigBacking;
+
+    //always points to the backing memory above
+    EmbeddedCliConfig * const mEmbeddedCliConfig;
+    uint64_t* mBuffer;
+    size_t mBufferElementCount;
     EmbeddedCli * mEmbeddedCli;
 };
 

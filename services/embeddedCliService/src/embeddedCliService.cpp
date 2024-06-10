@@ -25,9 +25,14 @@ namespace EmbeddedCLI {
 Service::Service() :
     QP::QActive(initial),
     mCharacterDevice(nullptr),
-    mEmbeddedCliConfig(nullptr),
+    mEmbeddedCliConfigBacking(),
+    mEmbeddedCliConfig(reinterpret_cast<EmbeddedCliConfig*>(mEmbeddedCliConfigBacking.data())),
+    mBuffer(nullptr),
+    mBufferElementCount(0),
     mEmbeddedCli(nullptr)
 {
+    static_assert(sizeof(mEmbeddedCliConfigBacking) >= sizeof(EmbeddedCliConfig),
+                  "backing memory for the cli config is not large enough!");
 }
 
 Service::~Service()
@@ -38,8 +43,9 @@ Service::~Service()
     }
 
     mEmbeddedCli = nullptr;
-    mEmbeddedCliConfig = nullptr;
     mCharacterDevice = nullptr;
+    mBuffer = nullptr;
+    mBufferElementCount = 0;
 }
 
 Q_STATE_DEF(Service, initial)
@@ -62,6 +68,8 @@ Q_STATE_DEF(Service, inactive)
             auto beginEvent  = reinterpret_cast<const BeginEvent*>(e);
             Q_ASSERT(beginEvent->mCharDevice != nullptr);
             mCharacterDevice = beginEvent->mCharDevice;
+            mBuffer = beginEvent->mBuffer;
+            mBufferElementCount = beginEvent->mBufferElementCount;
             rtn              = tran(&active);
         }
             break;
@@ -81,7 +89,19 @@ Q_STATE_DEF(Service, active)
     switch (e->sig) {
         case Q_ENTRY_SIG:
             mCharacterDevice->RegisterNewByteCallback(NewByteReceived, this);
-            mEmbeddedCliConfig = embeddedCliDefaultConfig();
+
+            //Copy the default config to our internal backing.
+            //This should allow for multiple CLI instances.
+            *mEmbeddedCliConfig = *embeddedCliDefaultConfig();
+            if (mBuffer != nullptr)
+            {
+                //make sure the buffer provided is large enough
+                //for the embedded-cli's requirements
+                uint16_t  requiredSize = embeddedCliRequiredSize(mEmbeddedCliConfig);
+                Q_ASSERT(requiredSize <= mBufferElementCount * sizeof(uint64_t));
+                mEmbeddedCliConfig->cliBuffer = mBuffer;
+                mEmbeddedCliConfig->cliBufferSize = mBufferElementCount * sizeof(uint64_t);
+            }
             mEmbeddedCli = embeddedCliNew(mEmbeddedCliConfig);
             mEmbeddedCli->appContext = this;
             mEmbeddedCli->writeChar = &Service::CliWriteChar;
@@ -108,11 +128,14 @@ Q_STATE_DEF(Service, active)
     return rtn;
 }
 
-void Service::BeginCliAsync(cms::interfaces::CharacterDevice* charDevice)
+void Service::BeginCliAsync(cms::interfaces::CharacterDevice* charDevice,
+                            uint64_t* buffer, size_t bufferElementCount)
 {
     Q_ASSERT(charDevice != nullptr);
     auto e = Q_NEW(BeginEvent, BEGIN_CLI_SIG);
     e->mCharDevice = charDevice;
+    e->mBuffer = buffer;
+    e->mBufferElementCount = bufferElementCount;
     this->POST(e, 0);
 }
 

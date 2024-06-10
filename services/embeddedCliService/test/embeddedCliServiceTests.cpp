@@ -182,3 +182,23 @@ TEST(EmbeddedCliServiceTests, upon_receiving_an_empty_linefeed_will_echo_same_an
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
 }
+
+TEST(EmbeddedCliServiceTests, service_supports_static_memory_for_the_cli)
+{
+    // I could not find a way to prove via this unit test
+    // that the static memory is used and malloc is not used.
+    // In theory, I could hijack malloc but the test environment
+    // itself is ultimately allocating memory too.
+    // Ultimately this particular test was proven manually and this
+    // actual test only exercises the exact API which was inspected
+    // for correctness.
+    using namespace cms::test;
+    std::array<uint64_t, 100> staticMemory = {0};
+
+    startService();
+    mock().ignoreOtherCalls();
+    mUnderTest->BeginCliAsync(mMockCharacterDevice, staticMemory.data(), staticMemory.size());
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
+    CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_ACTIVE_SIG));
+}

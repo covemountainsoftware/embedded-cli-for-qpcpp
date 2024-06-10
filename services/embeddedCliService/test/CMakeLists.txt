@@ -6,6 +6,7 @@ include_directories(${CMS_MOCK_CHAR_DEVICE_DIR})
 
 set(TEST_SOURCES
         embeddedCliServiceTests.cpp
+        embeddedCliServiceTestsWithoutPoolLeakDetection.cpp
         ../src/embeddedCliService.cpp
         ../src/embedded_cli_impl.c
         ${CMS_MOCK_CHAR_DEVICE_DIR}/mockCharacterDevice.cpp
