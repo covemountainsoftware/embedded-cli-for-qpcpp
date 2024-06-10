@@ -46,7 +46,6 @@ TEST_GROUP(EmbeddedCliServiceTests)
           qf_ctrl::RECORDER_PRIORITY, QP::Q_USER_SIG, MAX_PUB_SUB_SIG);
 
         mMockCharacterDevice = new cms::mocks::MockCharacterDevice();
-        mUnderTest = new EmbeddedCLI::Service();
     }
 
     void teardown() final
@@ -60,9 +59,10 @@ TEST_GROUP(EmbeddedCliServiceTests)
         delete mMockCharacterDevice;
     }
 
-    void startService() const
+    void startService(uint64_t* buffer = nullptr, size_t bufferElementCount = 0)
     {
         using namespace cms::test;
+        mUnderTest = new EmbeddedCLI::Service(buffer, bufferElementCount);
 
         mUnderTest->start(qf_ctrl::UNIT_UNDER_TEST_PRIORITY,
                           testQueueStorage.data(), testQueueStorage.size(),
@@ -72,7 +72,7 @@ TEST_GROUP(EmbeddedCliServiceTests)
         CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_INACTIVE_SIG));
     }
 
-    void startServiceToActive() const
+    void startServiceToActive()
     {
         using namespace cms::test;
 
@@ -195,9 +195,9 @@ TEST(EmbeddedCliServiceTests, service_supports_static_memory_for_the_cli)
     using namespace cms::test;
     std::array<uint64_t, 100> staticMemory = {0};
 
-    startService();
+    startService(staticMemory.data(), staticMemory.size());
     mock().ignoreOtherCalls();
-    mUnderTest->BeginCliAsync(mMockCharacterDevice, staticMemory.data(), staticMemory.size());
+    mUnderTest->BeginCliAsync(mMockCharacterDevice);
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
     CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_ACTIVE_SIG));

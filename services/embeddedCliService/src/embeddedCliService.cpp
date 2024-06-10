@@ -22,13 +22,13 @@ Q_DEFINE_THIS_MODULE("EmbeddedCliService")
 namespace cms {
 namespace EmbeddedCLI {
 
-Service::Service() :
+Service::Service(uint64_t* buffer, size_t bufferElementCount) :
     QP::QActive(initial),
     mCharacterDevice(nullptr),
     mEmbeddedCliConfigBacking(),
     mEmbeddedCliConfig(reinterpret_cast<EmbeddedCliConfig*>(mEmbeddedCliConfigBacking.data())),
-    mBuffer(nullptr),
-    mBufferElementCount(0),
+    mBuffer(buffer),
+    mBufferElementCount(bufferElementCount),
     mEmbeddedCli(nullptr)
 {
     static_assert(sizeof(mEmbeddedCliConfigBacking) >= sizeof(EmbeddedCliConfig),
@@ -44,8 +44,6 @@ Service::~Service()
 
     mEmbeddedCli = nullptr;
     mCharacterDevice = nullptr;
-    mBuffer = nullptr;
-    mBufferElementCount = 0;
 }
 
 Q_STATE_DEF(Service, initial)
@@ -68,8 +66,6 @@ Q_STATE_DEF(Service, inactive)
             auto beginEvent  = reinterpret_cast<const BeginEvent*>(e);
             Q_ASSERT(beginEvent->mCharDevice != nullptr);
             mCharacterDevice = beginEvent->mCharDevice;
-            mBuffer = beginEvent->mBuffer;
-            mBufferElementCount = beginEvent->mBufferElementCount;
             rtn              = tran(&active);
         }
             break;
@@ -128,14 +124,11 @@ Q_STATE_DEF(Service, active)
     return rtn;
 }
 
-void Service::BeginCliAsync(cms::interfaces::CharacterDevice* charDevice,
-                            uint64_t* buffer, size_t bufferElementCount)
+void Service::BeginCliAsync(cms::interfaces::CharacterDevice* charDevice)
 {
     Q_ASSERT(charDevice != nullptr);
     auto e = Q_NEW(BeginEvent, BEGIN_CLI_SIG);
     e->mCharDevice = charDevice;
-    e->mBuffer = buffer;
-    e->mBufferElementCount = bufferElementCount;
     this->POST(e, 0);
 }
 

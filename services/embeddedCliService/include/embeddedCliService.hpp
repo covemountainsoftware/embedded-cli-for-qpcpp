@@ -38,7 +38,13 @@ namespace EmbeddedCLI { //note, all caps CLI needed to avoid conflicts
  */
 class Service final : public QP::QActive {
 public:
-    Service();
+    /**
+     * Constructor
+     * @param buffer - set to nullptr and the internal CLI will malloc
+     *                 the necessary buffer
+     * @param bufferElementCount - the size of the provided buffer
+     */
+    explicit Service(uint64_t* buffer, size_t bufferElementCount);
     ~Service();
 
     Service(const Service&)            = delete;
@@ -63,7 +69,7 @@ public:
      * @note: Using uint64 to ensure all embedded-cli alignment requirements
      *        are met, regardless of environment.
      */
-    void BeginCliAsync(cms::interfaces::CharacterDevice* charDevice, uint64_t* buffer = nullptr, size_t bufferElementCount = 0);
+    void BeginCliAsync(cms::interfaces::CharacterDevice* charDevice);
 
 private:
     enum InternalSignals {
@@ -74,8 +80,6 @@ private:
     class BeginEvent : public QP::QEvt {
     public:
         cms::interfaces::CharacterDevice* mCharDevice;
-        uint64_t* mBuffer;
-        size_t mBufferElementCount;
     };
 
     class NewDataEvent : public QP::QEvt {
@@ -101,8 +105,8 @@ private:
 
     //always points to the backing memory above
     EmbeddedCliConfig * const mEmbeddedCliConfig;
-    uint64_t* mBuffer;
-    size_t mBufferElementCount;
+    uint64_t* const mBuffer;
+    const size_t mBufferElementCount;
     EmbeddedCli * mEmbeddedCli;
 };
 

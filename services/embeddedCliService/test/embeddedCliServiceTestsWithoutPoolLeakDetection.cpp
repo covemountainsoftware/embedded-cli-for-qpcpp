@@ -40,7 +40,6 @@ TEST_GROUP(EmbeddedCliServiceTestsWithoutMemPoolLeakDetect)
           qf_ctrl::RECORDER_PRIORITY, QP::Q_USER_SIG, MAX_PUB_SUB_SIG);
 
         mMockCharacterDevice = new cms::mocks::MockCharacterDevice();
-        mUnderTest = new EmbeddedCLI::Service();
     }
 
     void teardown() final
@@ -54,9 +53,11 @@ TEST_GROUP(EmbeddedCliServiceTestsWithoutMemPoolLeakDetect)
         delete mMockCharacterDevice;
     }
 
-    void startService() const
+    void startService(uint64_t* buffer = nullptr, size_t bufferElementCount = 0)
     {
         using namespace cms::test;
+
+        mUnderTest = new EmbeddedCLI::Service(buffer, bufferElementCount);
 
         mUnderTest->start(qf_ctrl::UNIT_UNDER_TEST_PRIORITY,
                           testQueueStorage.data(), testQueueStorage.size(),
@@ -72,9 +73,9 @@ TEST(EmbeddedCliServiceTestsWithoutMemPoolLeakDetect, service_asserts_if_static_
     using namespace cms::test;
     std::array<uint64_t, 1> staticMemory = {0}; //too small, will cause an assert
 
-    startService();
+    startService(staticMemory.data(), staticMemory.size());
     mock(QASSERT_MOCK_NAME).expectOneCall(ONERROR_FUNC_NAME).ignoreOtherParameters();
-    mUnderTest->BeginCliAsync(mMockCharacterDevice, staticMemory.data(), staticMemory.size());
+    mUnderTest->BeginCliAsync(mMockCharacterDevice);
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
 }
