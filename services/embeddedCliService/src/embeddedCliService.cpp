@@ -15,11 +15,6 @@
 #include "embeddedCliService.hpp"
 #include "pubsub_signals.hpp"
 #include "qsafe.h"
-
-//include the embedded-cli with implementation flag,
-//which pulls the actual CLI implementation into this source
-//code file.
-#define EMBEDDED_CLI_IMPL
 #include "embedded_cli.h"
 
 Q_DEFINE_THIS_MODULE("EmbeddedCliService")
