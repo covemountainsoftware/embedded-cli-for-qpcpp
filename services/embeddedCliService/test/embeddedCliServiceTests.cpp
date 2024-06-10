@@ -145,8 +145,8 @@ TEST(EmbeddedCliServiceTests, writes_default_prompt_after_default_activation)
     startService();
 
     //We expect the default output of a new CLI to be: "> "
-    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", '>');
-    mock("CharacterDevice").expectOneCall("WriteAsync").withParameter("byte", ' ');
+    Bytes expectedWrites = { '>', ' ' };
+    mockExpectWritesToCharacterDevice(expectedWrites);
     mock().ignoreOtherCalls();
 
     mUnderTest->BeginCliAsync(mMockCharacterDevice);
