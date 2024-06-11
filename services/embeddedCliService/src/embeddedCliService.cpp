@@ -129,6 +129,20 @@ Q_STATE_DEF(Service, active)
             rtn = Q_RET_HANDLED;
             break;
         }
+        case ADD_CLI_BINDING_SIG: {
+            rtn = Q_RET_HANDLED;
+            auto addBindingEvent = reinterpret_cast<const AddCliBindingEvent*>(e);
+            CliCommandBinding binding;
+            binding.context = addBindingEvent->mBinding.context;
+            binding.binding = addBindingEvent->mBinding.binding;
+            binding.name = addBindingEvent->mBinding.name;
+            binding.help = addBindingEvent->mBinding.help;
+            binding.tokenizeArgs = addBindingEvent->mBinding.tokenizeArgs;
+            embeddedCliAddBinding(mEmbeddedCli, binding);
+            embeddedCliProcess(mEmbeddedCli);
+            rtn = Q_RET_HANDLED;
+            break;
+        }
         default:
             rtn = super(&top);
             break;

@@ -279,9 +279,33 @@ TEST(EmbeddedCliServiceTests, service_adds_cli_binding_cmd_which_can_be_executed
 
     //the CLI will generate some output, which we don't care about in this case
     mock("CharacterDevice").ignoreOtherCalls();
-    mock("TEST").expectOneCall("onTestCmd").withParameter("context", mUnderTest);
+    mock("TEST").expectOneCall("onTestCmd").withParameter("context", mUnderTest).ignoreOtherParameters();
     //now inject the test command...
     mMockCharacterDevice->InjectCharacterSequence("test\n");
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
+}
+
+TEST(EmbeddedCliServiceTests, cli_cmd_not_executed_if_case_is_different)
+{
+    using namespace cms::test;
+    startServiceToActive();
+
+    mUnderTest->AddCliBindingAsync({
+      "test",  //lower case
+      "Help Me!",
+      true,
+      mUnderTest,
+      onTestCmd
+    });
+    qf_ctrl::ProcessEvents();
+    mock().clear();
+
+    //the CLI will generate some output, which we don't care about in this case
+    mock("CharacterDevice").ignoreOtherCalls();
+    mock("TEST").expectNoCall("onTestCmd");
+    //now inject the incorrect TEST command...
+    mMockCharacterDevice->InjectCharacterSequence("TEST\n");  //upper case
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
 }
