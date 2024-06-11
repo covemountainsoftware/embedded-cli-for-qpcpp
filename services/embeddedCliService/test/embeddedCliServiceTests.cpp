@@ -245,3 +245,19 @@ TEST(EmbeddedCliServiceTests, service_asserts_if_add_cli_binding_when_inactive)
     });
     mock().checkExpectations();
 }
+
+TEST(EmbeddedCliServiceTests, service_asserts_if_add_cli_binding_cmd_is_null)
+{
+    using namespace cms::test;
+    startServiceToActive();
+
+    MockExpectQAssert();
+    mUnderTest->AddCliBindingAsync({
+      "testCmd",
+      "Help Me!",
+      true,
+      mUnderTest,
+      nullptr
+    });
+    mock().checkExpectations();
+}
