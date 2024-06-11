@@ -162,6 +162,11 @@ void Service::BeginCliAsync(cms::interfaces::CharacterDevice* charDevice)
     this->POST(e, 0);
 }
 
+void Service::EndCliAsync()
+{
+    //TODO
+}
+
 void Service::AddCliBindingAsync(const CommandBinding& binding)
 {
     Q_ASSERT(binding.binding != nullptr);

@@ -122,6 +122,11 @@ public:
      */
     void AddCliBindingAsync(const CommandBinding& binding);
 
+    /**
+     *   Will asynchronously stop and release all CLI resources.
+     */
+    void EndCliAsync();
+    
 private:
     enum InternalSignals {
         BEGIN_CLI_SIG = MAX_PUB_SUB_SIG,

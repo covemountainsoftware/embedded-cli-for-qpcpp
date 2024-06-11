@@ -168,6 +168,20 @@ TEST(EmbeddedCliServiceTests, publishes_an_event_upon_active)
     CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_ACTIVE_SIG));
 }
 
+TEST(EmbeddedCliServiceTests, service_can_return_to_inactive)
+{
+    using namespace cms::test;
+    startServiceToActive();
+
+    //only interested in the pub sub event in this test
+    mock().ignoreOtherCalls();
+
+    mUnderTest->EndCliAsync();
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
+    CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_INACTIVE_SIG));
+}
+
 TEST(EmbeddedCliServiceTests, upon_receiving_an_empty_linefeed_will_echo_same_and_prompt)
 {
     using namespace cms::test;
