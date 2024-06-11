@@ -88,6 +88,10 @@ Q_STATE_DEF(Service, inactive)
             rtn              = tran(&active);
         }
             break;
+        case ADD_CLI_BINDING_SIG:
+            Q_ASSERT(false);
+            rtn = Q_RET_HANDLED;
+            break;
         default:
             rtn = super(&top);
             break;
@@ -145,9 +149,9 @@ void Service::AddCliBindingAsync(const CommandBinding& binding)
 {
     Q_ASSERT(binding.binding != nullptr);
     Q_ASSERT(binding.name != nullptr);
-
-    //TODO
-    Q_ASSERT(false);
+    auto e = Q_NEW(AddCliBindingEvent, ADD_CLI_BINDING_SIG);
+    e->mBinding = binding;
+    this->POST(e, 0);
 }
 
 void Service::CliWriteChar(EmbeddedCli *embeddedCli, char c)

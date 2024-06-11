@@ -125,7 +125,8 @@ public:
 private:
     enum InternalSignals {
         BEGIN_CLI_SIG = MAX_PUB_SUB_SIG,
-        NEW_CLI_DATA_SIG
+        NEW_CLI_DATA_SIG,
+        ADD_CLI_BINDING_SIG,
     };
 
     class BeginEvent : public QP::QEvt {
@@ -136,6 +137,11 @@ private:
     class NewDataEvent : public QP::QEvt {
     public:
        uint8_t mByte;
+    };
+
+    class AddCliBindingEvent : public QP::QEvt {
+    public:
+        CommandBinding mBinding;
     };
 
     //Active Object States

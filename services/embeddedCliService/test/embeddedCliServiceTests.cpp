@@ -230,22 +230,6 @@ static void onTestCmd(EmbeddedCli* cli, char* args, void* context)
       .withParameter("context", context);
 }
 
-TEST(EmbeddedCliServiceTests, service_asserts_if_add_cli_binding_when_inactive)
-{
-    using namespace cms::test;
-    startService();
-
-    MockExpectQAssert();
-    mUnderTest->AddCliBindingAsync({
-      "testCmd",
-      "Help Me!",
-      true,
-      mUnderTest,
-      onTestCmd
-    });
-    mock().checkExpectations();
-}
-
 TEST(EmbeddedCliServiceTests, service_asserts_if_add_cli_binding_cmd_is_null)
 {
     using namespace cms::test;
@@ -275,5 +259,29 @@ TEST(EmbeddedCliServiceTests, service_asserts_if_add_cli_binding_cmd_string_is_n
       mUnderTest,
       onTestCmd
     });
+    mock().checkExpectations();
+}
+
+TEST(EmbeddedCliServiceTests, service_adds_cli_binding_cmd_which_can_be_executed)
+{
+    using namespace cms::test;
+    startServiceToActive();
+
+    mUnderTest->AddCliBindingAsync({
+      "test",
+      "Help Me!",
+      true,
+      mUnderTest,
+      onTestCmd
+    });
+    qf_ctrl::ProcessEvents();
+    mock().clear();
+
+    //the CLI will generate some output, which we don't care about in this case
+    mock("CharacterDevice").ignoreOtherCalls();
+    mock("TEST").expectOneCall("onTestCmd").withParameter("context", mUnderTest);
+    //now inject the test command...
+    mMockCharacterDevice->InjectCharacterSequence("test\n");
+    qf_ctrl::ProcessEvents();
     mock().checkExpectations();
 }

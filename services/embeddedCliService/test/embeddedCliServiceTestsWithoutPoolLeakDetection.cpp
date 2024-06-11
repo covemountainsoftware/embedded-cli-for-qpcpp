@@ -77,3 +77,28 @@ TEST(EmbeddedCliServiceTestsWithoutMemPoolLeakDetect, service_asserts_if_static_
     startService(staticMemory.data(), staticMemory.size());
     mock().checkExpectations();
 }
+
+
+static void onTestCmd(EmbeddedCli* cli, char* args, void* context)
+{
+    (void)cli;
+    (void)args;
+    (void)context;
+}
+
+TEST(EmbeddedCliServiceTestsWithoutMemPoolLeakDetect, service_asserts_if_add_cli_binding_when_inactive)
+{
+    using namespace cms::test;
+    startService();
+
+    MockExpectQAssert();
+    mUnderTest->AddCliBindingAsync({
+      "testCmd",
+      "Help Me!",
+      true,
+      mUnderTest,
+      onTestCmd
+    });
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
+}
