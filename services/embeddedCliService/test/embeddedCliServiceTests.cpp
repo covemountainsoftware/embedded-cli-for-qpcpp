@@ -103,7 +103,6 @@ TEST(EmbeddedCliServiceTests, when_created_and_initialized_does_not_crash)
     startService();
 }
 
-
 TEST(EmbeddedCliServiceTests, after_initial_init_emits_inactive_signal)
 {
     //I like a service to perform minimal initialization
@@ -306,6 +305,48 @@ TEST(EmbeddedCliServiceTests, cli_cmd_not_executed_if_case_is_different)
     mock("TEST").expectNoCall("onTestCmd");
     //now inject the incorrect TEST command...
     mMockCharacterDevice->InjectCharacterSequence("TEST\n");  //upper case
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
+}
+
+static void onTempCmd(EmbeddedCli* cli, char* args, void* context)
+{
+    (void)cli;
+    (void)args;
+    (void)context;
+    mock("TEST").actualCall(__FUNCTION__)
+      .withParameter("cli", cli)
+      .withParameter("args", args)
+      .withParameter("context", context);
+}
+
+TEST(EmbeddedCliServiceTests, cli_supports_tab_completion)
+{
+    using namespace cms::test;
+    startServiceToActive();
+
+    mUnderTest->AddCliBindingAsync({
+      "testing",
+      "Help Me!",
+      true,
+      mUnderTest,
+      onTestCmd
+    });
+    mUnderTest->AddCliBindingAsync({
+      "temp",
+      "Temp Me!",
+      true,
+      mUnderTest,
+      onTempCmd
+    });
+    qf_ctrl::ProcessEvents();
+    mock().clear();
+
+    //the CLI will generate some output, which we don't care about in this case
+    mock("CharacterDevice").ignoreOtherCalls();
+    mock("TEST").expectOneCall("onTestCmd").withParameter("context", mUnderTest).ignoreOtherParameters();
+    //now inject the test command...
+    mMockCharacterDevice->InjectCharacterSequence("tes\t\n");
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
 }
