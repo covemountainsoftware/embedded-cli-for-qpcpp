@@ -126,10 +126,11 @@ public:
      *   Will asynchronously stop and release all CLI resources.
      */
     void EndCliAsync();
-    
+
 private:
     enum InternalSignals {
         BEGIN_CLI_SIG = MAX_PUB_SUB_SIG,
+        END_CLI_SIG,
         NEW_CLI_DATA_SIG,
         ADD_CLI_BINDING_SIG,
     };

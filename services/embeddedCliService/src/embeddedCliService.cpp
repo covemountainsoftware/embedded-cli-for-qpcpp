@@ -78,6 +78,12 @@ Q_STATE_DEF(Service, inactive)
     QP::QState rtn;
     switch (e->sig) {
         case Q_ENTRY_SIG:
+            if (mEmbeddedCli)
+            {
+                embeddedCliFree(mEmbeddedCli);
+            }
+            mEmbeddedCli = nullptr;
+            mCharacterDevice = nullptr;
             QP::QF::PUBLISH(&inactiveEvent, this);
             rtn = Q_RET_HANDLED;
             break;
@@ -90,6 +96,10 @@ Q_STATE_DEF(Service, inactive)
             break;
         case ADD_CLI_BINDING_SIG:
             Q_ASSERT(false);
+            rtn = Q_RET_HANDLED;
+            break;
+        case END_CLI_SIG:
+            //nothing to do, already inactive
             rtn = Q_RET_HANDLED;
             break;
         default:
@@ -146,6 +156,9 @@ Q_STATE_DEF(Service, active)
             rtn = Q_RET_HANDLED;
             break;
         }
+        case END_CLI_SIG:
+            rtn = tran(&inactive);
+            break;
         default:
             rtn = super(&top);
             break;
@@ -164,7 +177,8 @@ void Service::BeginCliAsync(cms::interfaces::CharacterDevice* charDevice)
 
 void Service::EndCliAsync()
 {
-    //TODO
+    static const QP::QEvt endCliEvent = QP::QEvt(END_CLI_SIG);
+    this->POST(&endCliEvent, 0);
 }
 
 void Service::AddCliBindingAsync(const CommandBinding& binding)
