@@ -133,6 +133,9 @@ Q_STATE_DEF(Service, active)
             rtn = Q_RET_HANDLED;
             auto addBindingEvent = reinterpret_cast<const AddCliBindingEvent*>(e);
             CliCommandBinding binding;
+
+            static_assert(sizeof(CliCommandBinding) == sizeof(CommandBinding), "internal compatibility may have changed");
+
             binding.context = addBindingEvent->mBinding.context;
             binding.binding = addBindingEvent->mBinding.binding;
             binding.name = addBindingEvent->mBinding.name;
