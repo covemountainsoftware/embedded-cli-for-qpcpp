@@ -12,10 +12,13 @@ encourage and support efforts like this. Thank you!
 
 # Introduction
 
-The `cpputest-for-qpcpp` project enables CppUTest for the 
-QP/C++ Real-Time Embedded Framework, and is maintained in a separate repository.
+The `embedded-cli-for-qpcpp` repository provides a ready-to-use QP/C++ compatible integration 
+of the external `embedded-cli`. The service/integration itself is MIT licensed.
+Follow the commits starting around June 8 2024 to see a TDD development process in action.
 
-This particular repository provides an embedded CLI example using the embedded-cli. 
+This repo makes use of the `cpputest-for-qpcpp` project which enables CppUTest for the 
+QP/C++ Real-Time Embedded Framework, and is maintained in a separate repository with 
+separate licensing.
 
 For more details, please see https://github.com/covemountainsoftware/cpputest-for-qpcpp
 
@@ -31,7 +34,7 @@ be compatible with this code.
 * CMake and associated build tools were used to develop
   and prove out this project.
 * cpputest-for-qpcpp library, pulled in as a separate git submodule
-* embedded-cli (https://github.com/funbiscuit/embedded-cli/releases/tag/v0.1.4), header file only directly included within this project
+* embedded-cli (https://github.com/funbiscuit/embedded-cli/releases/tag/v0.1.4), header file only directly included within this repository
 * qpcpp (pulled in as a separate git submodule)
   * After cloning this repository, do not forget to:
   * `git submodule init`
@@ -49,7 +52,7 @@ See the configuration at: `.github/workflows/cmake.yml`
 
 # License
 
-The example cli active object is offered for free via the MIT license.
+The example embedded-cli active object is offered for free via the MIT license.
 
 The `cpputest-for-qpcpp` project is offered under a dual-license. See that
 project for details.
