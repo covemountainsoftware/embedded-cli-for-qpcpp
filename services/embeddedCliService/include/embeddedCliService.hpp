@@ -30,6 +30,44 @@ namespace cms {
 namespace EmbeddedCLI { //note, all caps CLI needed to avoid conflicts
 
 /**
+ * This is basically a copy of the same struct from embedded-cli.
+ * Going a bit out of my way to avoid exposing embedded-cli details
+ * outside this service.
+ */
+struct CommandBinding {
+    /**
+     * Name of command to bind. Should not be NULL.
+     */
+    const char *name;
+
+    /**
+     * Help string that will be displayed when "help <cmd>" is executed.
+     * Can have multiple lines separated with "\r\n"
+     * Can be NULL if no help is provided.
+     */
+    const char *help;
+
+    /**
+     * Flag to perform tokenization before calling binding function.
+     */
+    bool tokenizeArgs;
+
+    /**
+     * Pointer to any specific app context that is required for this binding.
+     * It will be provided in binding callback.
+     */
+    void *context;
+
+    /**
+     * Binding function for when command is received.
+     * @param cli - pointer to cli that is calling this binding
+     * @param args - string of args (if tokenizeArgs is false) or tokens otherwise
+     * @param context
+     */
+    void (*binding)(EmbeddedCli *cli, char *args, void *context);
+};
+
+/**
  * The EmbeddedCLI::Service creates a command line interface
  * using a provided character device.
  *
@@ -72,6 +110,17 @@ public:
      *        are met, regardless of environment.
      */
     void BeginCliAsync(cms::interfaces::CharacterDevice* charDevice);
+
+    /**
+     * Asynchronously add a CLI command binding to the embedded-cli
+     * managed by this AO.
+     *
+     * Will assert if the AO is not active.
+     * Will assert if no free bindings are available.
+     *
+     * @param binding
+     */
+    void AddCliBindingAsync(const CommandBinding& binding);
 
 private:
     enum InternalSignals {

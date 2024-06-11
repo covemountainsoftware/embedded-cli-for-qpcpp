@@ -141,6 +141,12 @@ void Service::BeginCliAsync(cms::interfaces::CharacterDevice* charDevice)
     this->POST(e, 0);
 }
 
+void Service::AddCliBindingAsync(const CommandBinding& binding)
+{
+    (void)binding;
+    Q_ASSERT(false);
+}
+
 void Service::CliWriteChar(EmbeddedCli *embeddedCli, char c)
 {
     auto me = static_cast<Service*>(embeddedCli->appContext);

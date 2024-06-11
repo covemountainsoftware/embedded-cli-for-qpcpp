@@ -22,6 +22,7 @@
 #include "mockCharacterDevice.hpp"
 
 // the cpputest headers must always be last
+#include "qassertMockSupport.hpp"
 #include "CppUTest/TestHarness.h"
 #include "CppUTestExt/MockSupport.h"
 
@@ -203,7 +204,6 @@ TEST(EmbeddedCliServiceTests, service_supports_static_memory_for_the_cli)
     CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_ACTIVE_SIG));
 }
 
-
 TEST(EmbeddedCliServiceTests, service_supports_a_custom_invitation)
 {
     using namespace cms::test;
@@ -216,5 +216,32 @@ TEST(EmbeddedCliServiceTests, service_supports_a_custom_invitation)
     //inject characters into our mock character device
     mMockCharacterDevice->InjectCharacterSequence("\n");
     qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
+}
+
+static void onTestCmd(EmbeddedCli* cli, char* args, void* context)
+{
+    (void)cli;
+    (void)args;
+    (void)context;
+    mock("TEST").actualCall(__FUNCTION__)
+      .withParameter("cli", cli)
+      .withParameter("args", args)
+      .withParameter("context", context);
+}
+
+TEST(EmbeddedCliServiceTests, service_asserts_if_add_cli_binding_when_inactive)
+{
+    using namespace cms::test;
+    startService();
+
+    MockExpectQAssert();
+    mUnderTest->AddCliBindingAsync({
+      "testCmd",
+      "Help Me!",
+      true,
+      mUnderTest,
+      onTestCmd
+    });
     mock().checkExpectations();
 }
