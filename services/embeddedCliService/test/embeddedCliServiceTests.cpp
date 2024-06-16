@@ -150,6 +150,9 @@ TEST(EmbeddedCliServiceTests, writes_default_prompt_after_default_activation)
     mockExpectWritesToCharacterDevice(expectedWrites);
     mock().ignoreOtherCalls();
 
+    //ignore the event, it is now a dynamic event and will create
+    //a memory pool leak if not handled or ignored.
+    mRecorder->oneShotIgnoreEvent(EMBEDDED_CLI_ACTIVE_SIG);
     mUnderTest->BeginCliAsync(mMockCharacterDevice);
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
@@ -378,5 +381,6 @@ TEST(EmbeddedCliServiceTests, the_published_cli_active_event_includes_a_pointer_
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
     auto event = mRecorder->getRecordedEvent<cms::EmbeddedCLI::Event>();
+    CHECK_EQUAL(EMBEDDED_CLI_ACTIVE_SIG, event->sig);
     CHECK_EQUAL(mUnderTest, event->mCliService);
 }

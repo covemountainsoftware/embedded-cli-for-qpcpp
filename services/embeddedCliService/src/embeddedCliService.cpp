@@ -13,6 +13,7 @@
 /// @endcond
 
 #include "embeddedCliService.hpp"
+#include "embeddedCliEvent.hpp"
 #include "pubsub_signals.hpp"
 #include "qsafe.h"
 #include "embedded_cli.h"
@@ -112,8 +113,6 @@ Q_STATE_DEF(Service, inactive)
 
 Q_STATE_DEF(Service, active)
 {
-    static const QP::QEvt activeEvent = QP::QEvt(EMBEDDED_CLI_ACTIVE_SIG);
-
     QP::QState rtn;
     switch (e->sig) {
         case Q_ENTRY_SIG: {
@@ -124,7 +123,9 @@ Q_STATE_DEF(Service, active)
             mEmbeddedCli->appContext = this;
             mEmbeddedCli->writeChar = &Service::CliWriteChar;
             embeddedCliProcess(mEmbeddedCli);
-            QP::QF::PUBLISH(&activeEvent, this);
+            Event* activeEvent = Q_NEW(Event, EMBEDDED_CLI_ACTIVE_SIG);
+            activeEvent->mCliService = this;
+            QP::QF::PUBLISH(activeEvent, this);
             rtn = Q_RET_HANDLED;
             break;
         }
