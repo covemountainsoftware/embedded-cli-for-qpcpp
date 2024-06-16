@@ -13,6 +13,7 @@
 /// @endcond
 
 #include "embeddedCliService.hpp"
+#include "embeddedCliEvent.hpp"
 #include <array>
 #include <vector>
 #include "cms_cpputest_qf_ctrl.hpp"
@@ -363,4 +364,19 @@ TEST(EmbeddedCliServiceTests, cli_supports_tab_completion)
     mMockCharacterDevice->InjectCharacterSequence("tes\t\n");
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
+}
+
+TEST(EmbeddedCliServiceTests, the_published_cli_active_event_includes_a_pointer_to_the_service)
+{
+    using namespace cms::test;
+    startService();
+
+    //only interested in the pub sub event in this test
+    mock().ignoreOtherCalls();
+
+    mUnderTest->BeginCliAsync(mMockCharacterDevice);
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
+    auto event = mRecorder->getRecordedEvent<cms::EmbeddedCLI::Event>();
+    CHECK_EQUAL(mUnderTest, event->mCliService);
 }
