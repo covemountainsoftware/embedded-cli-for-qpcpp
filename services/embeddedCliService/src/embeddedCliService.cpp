@@ -23,7 +23,7 @@ Q_DEFINE_THIS_MODULE("EmbeddedCliService")
 namespace cms {
 namespace EmbeddedCLI {
 
-Service::Service(uint64_t* buffer, size_t bufferElementCount, const char * customInvitation) :
+Service::Service(uint64_t* buffer, size_t bufferElementCount, uint16_t maxBindingCount, const char * customInvitation) :
     QP::QActive(initial),
     mCharacterDevice(nullptr),
     mEmbeddedCliConfigBacking(),
@@ -44,6 +44,10 @@ Service::Service(uint64_t* buffer, size_t bufferElementCount, const char * custo
 
     if (customInvitation != nullptr) {
         mEmbeddedCliConfig->invitation = customInvitation;
+    }
+
+    if (maxBindingCount != 0) {
+        mEmbeddedCliConfig->maxBindingCount = maxBindingCount;
     }
 
     // After all configuration items have been set,

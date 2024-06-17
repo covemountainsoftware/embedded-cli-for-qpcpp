@@ -61,10 +61,10 @@ TEST_GROUP(EmbeddedCliServiceTests)
         delete mMockCharacterDevice;
     }
 
-    void startService(uint64_t* buffer = nullptr, size_t bufferElementCount = 0, const char * customInvitation = nullptr)
+    void startService(uint64_t* buffer = nullptr, size_t bufferElementCount = 0, const char * customInvitation = nullptr, uint16_t maxCliCount = 16)
     {
         using namespace cms::test;
-        mUnderTest = new EmbeddedCLI::Service(buffer, bufferElementCount, customInvitation);
+        mUnderTest = new EmbeddedCLI::Service(buffer, bufferElementCount, maxCliCount, customInvitation);
 
         mUnderTest->start(qf_ctrl::UNIT_UNDER_TEST_PRIORITY,
                           testQueueStorage.data(), testQueueStorage.size(),
@@ -213,7 +213,7 @@ TEST(EmbeddedCliServiceTests, service_supports_static_memory_for_the_cli)
     using namespace cms::test;
     std::array<uint64_t, 100> staticMemory = {0};
 
-    startService(staticMemory.data(), staticMemory.size());
+    startService(staticMemory.data(), staticMemory.size(), nullptr, 8);
     mock().ignoreOtherCalls();
     mUnderTest->BeginCliAsync(mMockCharacterDevice);
     qf_ctrl::ProcessEvents();
@@ -383,4 +383,45 @@ TEST(EmbeddedCliServiceTests, the_published_cli_active_event_includes_a_pointer_
     auto event = mRecorder->getRecordedEvent<cms::EmbeddedCLI::Event>();
     CHECK_EQUAL(EMBEDDED_CLI_ACTIVE_SIG, event->sig);
     CHECK_EQUAL(mUnderTest, event->mCliService);
+}
+
+
+TEST(EmbeddedCliServiceTests, the_service_supports_configurable_max_cli_binding_count)
+{
+    using namespace cms::test;
+    startService(nullptr, 0, nullptr, 1);
+    mock().ignoreOtherCalls();
+
+    mUnderTest->BeginCliAsync(mMockCharacterDevice);
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
+    CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_ACTIVE_SIG));
+
+    mUnderTest->AddCliBindingAsync({
+      "testing",
+      "Help Me!",
+      true,
+      mUnderTest,
+      onTestCmd
+    });
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
+    mUnderTest->AddCliBindingAsync({
+      "temp",
+      "Temp Me!",
+      true,
+      mUnderTest,
+      onTempCmd
+    });
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
+    mUnderTest->AddCliBindingAsync({
+      "tedmp",
+      "Temp Me!",
+      true,
+      mUnderTest,
+      onTempCmd
+    });
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
 }

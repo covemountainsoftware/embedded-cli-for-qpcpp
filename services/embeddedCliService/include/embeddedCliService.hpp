@@ -81,10 +81,13 @@ public:
      * @param buffer - set to nullptr and the internal CLI will malloc
      *                 the necessary buffer
      * @param bufferElementCount - the size of the provided buffer
+     * @param maxBindingCount - the maximum number of CLI commands that
+     *                          can be added to this CLI. Set to zero to
+     *                          use internal default value.
      * @param customInvitation - a custom string for the CLI prompt.
      *                           Set to nullptr for the internal default prompt
      */
-    explicit Service(uint64_t* buffer, size_t bufferElementCount, const char * customInvitation);
+    explicit Service(uint64_t* buffer, size_t bufferElementCount, uint16_t maxBindingCount, const char * customInvitation = nullptr);
     ~Service();
 
     Service(const Service&)            = delete;
