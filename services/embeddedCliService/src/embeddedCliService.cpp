@@ -28,7 +28,8 @@ Service::Service(uint64_t* buffer, size_t bufferElementCount, uint16_t maxBindin
     mCharacterDevice(nullptr),
     mEmbeddedCliConfigBacking(),
     mEmbeddedCliConfig(reinterpret_cast<EmbeddedCliConfig*>(mEmbeddedCliConfigBacking.data())),
-    mEmbeddedCli(nullptr)
+    mEmbeddedCli(nullptr),
+    mActiveEvent(EMBEDDED_CLI_ACTIVE_SIG, this)
 {
     static_assert(sizeof(mEmbeddedCliConfigBacking) >= sizeof(EmbeddedCliConfig),
                   "backing memory for the cli config is not large enough!");
@@ -127,9 +128,7 @@ Q_STATE_DEF(Service, active)
             mEmbeddedCli->appContext = this;
             mEmbeddedCli->writeChar = &Service::CliWriteChar;
             embeddedCliProcess(mEmbeddedCli);
-            Event* activeEvent = Q_NEW(Event, EMBEDDED_CLI_ACTIVE_SIG);
-            activeEvent->mCliService = this;
-            QP::QF::PUBLISH(activeEvent, this);
+            QP::QF::PUBLISH(&mActiveEvent, this);
             rtn = Q_RET_HANDLED;
             break;
         }

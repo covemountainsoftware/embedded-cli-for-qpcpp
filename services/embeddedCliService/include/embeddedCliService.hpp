@@ -22,6 +22,7 @@
 #include "pubsub_signals.hpp"
 #include "characterDeviceInterface.hpp"
 #include "embeddedCliCommandBinding.hpp"
+#include "embeddedCliEvent.hpp"
 
 //forward declare the third-party EmbeddedCli structs
 struct EmbeddedCli;
@@ -135,6 +136,7 @@ private:
     //always points to the backing memory above
     EmbeddedCliConfig * const mEmbeddedCliConfig;
     EmbeddedCli * mEmbeddedCli;
+    const Event mActiveEvent;
 };
 
 } //namespace EmbeddedCli

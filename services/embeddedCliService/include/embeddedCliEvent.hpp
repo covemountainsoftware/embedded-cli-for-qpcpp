@@ -16,10 +16,12 @@
 #define CMS_EMBEDDED_CLI_EVENT_HPP
 
 #include "qpcpp.hpp"
-#include "embeddedCliService.hpp"
 
 namespace cms {
 namespace EmbeddedCLI {
+
+//forward declare the Service class
+class Service;
 
 /**
  * A trivial event with a convenience member holding
