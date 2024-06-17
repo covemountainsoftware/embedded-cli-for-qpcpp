@@ -145,7 +145,6 @@ Q_STATE_DEF(Service, active)
             break;
         }
         case ADD_CLI_BINDING_SIG: {
-            rtn = Q_RET_HANDLED;
             auto addBindingEvent = reinterpret_cast<const AddCliBindingEvent*>(e);
             CliCommandBinding binding;
 
@@ -156,7 +155,8 @@ Q_STATE_DEF(Service, active)
             binding.name = addBindingEvent->mBinding.name;
             binding.help = addBindingEvent->mBinding.help;
             binding.tokenizeArgs = addBindingEvent->mBinding.tokenizeArgs;
-            embeddedCliAddBinding(mEmbeddedCli, binding);
+            bool ok = embeddedCliAddBinding(mEmbeddedCli, binding);
+            Q_ASSERT(ok);
             embeddedCliProcess(mEmbeddedCli);
             rtn = Q_RET_HANDLED;
             break;

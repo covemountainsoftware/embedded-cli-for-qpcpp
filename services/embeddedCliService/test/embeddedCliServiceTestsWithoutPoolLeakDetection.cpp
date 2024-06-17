@@ -53,11 +53,11 @@ TEST_GROUP(EmbeddedCliServiceTestsWithoutMemPoolLeakDetect)
         delete mMockCharacterDevice;
     }
 
-    void startService(uint64_t* buffer = nullptr, size_t bufferElementCount = 0)
+    void startService(uint64_t* buffer = nullptr, size_t bufferElementCount = 0, uint16_t maxBindingCount = 0)
     {
         using namespace cms::test;
 
-        mUnderTest = new EmbeddedCLI::Service(buffer, bufferElementCount, 0, nullptr);
+        mUnderTest = new EmbeddedCLI::Service(buffer, bufferElementCount, maxBindingCount, nullptr);
 
         mUnderTest->start(qf_ctrl::UNIT_UNDER_TEST_PRIORITY,
                           testQueueStorage.data(), testQueueStorage.size(),
@@ -95,6 +95,43 @@ TEST(EmbeddedCliServiceTestsWithoutMemPoolLeakDetect, service_asserts_if_add_cli
     mUnderTest->AddCliBindingAsync({
       "testCmd",
       "Help Me!",
+      true,
+      mUnderTest,
+      onTestCmd
+    });
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
+}
+
+TEST(EmbeddedCliServiceTestsWithoutMemPoolLeakDetect, the_service_supports_configurable_max_cli_binding_count)
+{
+    using namespace cms::test;
+    startService(nullptr, 0, 1);
+    mock().ignoreOtherCalls();
+
+    mUnderTest->BeginCliAsync(mMockCharacterDevice);
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
+    CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_ACTIVE_SIG));
+
+    mUnderTest->AddCliBindingAsync({
+      "testing",
+      "Help Me!",
+      true,
+      mUnderTest,
+      onTestCmd
+    });
+    qf_ctrl::ProcessEvents();
+    mock().checkExpectations();
+    mock().clear();
+
+    //adding the second CLI command should assert, as we
+    //configured this test instance to support only a single CLI
+    //command.
+    MockExpectQAssert();
+    mUnderTest->AddCliBindingAsync({
+      "temp",
+      "Temp Me!",
       true,
       mUnderTest,
       onTestCmd
