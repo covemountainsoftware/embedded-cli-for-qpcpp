@@ -1,9 +1,19 @@
-//
-// Created by eshlemanm on 6/16/24.
-//
+/// @brief  The Embedded-CLI Service, Event class
+/// @ingroup
+/// @cond
+///***************************************************************************
+///
+/// License is noted in the service's LICENSE.txt file (MIT)
+///
+/// Contact Information:
+///   Matthew Eshleman
+///   https://covemountainsoftware.com
+///   info@covemountainsoftware.com
+///***************************************************************************
+/// @endcond
 
-#ifndef EMBEDDED_CLI_FOR_QPCPP_EMBEDDEDCLIEVENT_HPP
-#define EMBEDDED_CLI_FOR_QPCPP_EMBEDDEDCLIEVENT_HPP
+#ifndef CMS_EMBEDDED_CLI_EVENT_HPP
+#define CMS_EMBEDDED_CLI_EVENT_HPP
 
 #include "qpcpp.hpp"
 #include "embeddedCliService.hpp"
@@ -36,4 +46,4 @@ public:
 } //namespace EmbeddedCLI
 } //namespace cms
 
-#endif   // EMBEDDED_CLI_FOR_QPCPP_EMBEDDEDCLIEVENT_HPP
+#endif   // CMS_EMBEDDED_CLI_EVENT_HPP

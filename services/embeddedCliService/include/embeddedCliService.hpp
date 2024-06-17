@@ -12,8 +12,8 @@
 ///***************************************************************************
 /// @endcond
 
-#ifndef EMBEDDED_CLI_FOR_QPCPP_EMBEDDEDCLISERVICE_HPP
-#define EMBEDDED_CLI_FOR_QPCPP_EMBEDDEDCLISERVICE_HPP
+#ifndef CMS_EMBEDDED_CLI_SERVICE_HPP
+#define CMS_EMBEDDED_CLI_SERVICE_HPP
 
 #include <cstdint>
 #include <cstddef>
@@ -21,6 +21,7 @@
 #include "qpcpp.hpp"
 #include "pubsub_signals.hpp"
 #include "characterDeviceInterface.hpp"
+#include "embeddedCliCommandBinding.hpp"
 
 //forward declare the third-party EmbeddedCli structs
 struct EmbeddedCli;
@@ -28,44 +29,6 @@ struct EmbeddedCliConfig;
 
 namespace cms {
 namespace EmbeddedCLI { //note, all caps CLI needed to avoid conflicts
-
-/**
- * This is basically a copy of the same struct from embedded-cli.
- * Going a bit out of my way to avoid exposing embedded-cli details
- * outside this service.
- */
-struct CommandBinding {
-    /**
-     * Name of command to bind. Should not be NULL.
-     */
-    const char *name;
-
-    /**
-     * Help string that will be displayed when "help <cmd>" is executed.
-     * Can have multiple lines separated with "\r\n"
-     * Can be NULL if no help is provided.
-     */
-    const char *help;
-
-    /**
-     * Flag to perform tokenization before calling binding function.
-     */
-    bool tokenizeArgs;
-
-    /**
-     * Pointer to any specific app context that is required for this binding.
-     * It will be provided in binding callback.
-     */
-    void *context;
-
-    /**
-     * Binding function for when command is received.
-     * @param cli - pointer to cli that is calling this binding
-     * @param args - string of args (if tokenizeArgs is false) or tokens otherwise
-     * @param context
-     */
-    void (*binding)(EmbeddedCli *cli, char *args, void *context);
-};
 
 /**
  * The EmbeddedCLI::Service creates a command line interface
@@ -177,4 +140,4 @@ private:
 } //namespace EmbeddedCli
 } //namespace cms
 
-#endif   // EMBEDDED_CLI_FOR_QPCPP_EMBEDDEDCLISERVICE_HPP
+#endif   // CMS_EMBEDDED_CLI_SERVICE_HPP
