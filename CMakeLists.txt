@@ -24,4 +24,5 @@ set(QP_CPP_INCLUDE_DIR ${CMS_QPC_TOP_DIR}/include)
 add_subdirectory(drivers)
 add_subdirectory(test_support)
 add_subdirectory(services)
-
+add_subdirectory(externals/qpcpp)
+add_subdirectory(examples)
