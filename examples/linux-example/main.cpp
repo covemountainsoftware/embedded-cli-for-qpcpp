@@ -1,6 +1,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <array>
+#include <thread>
+#include <unistd.h>
 #include "qpcpp.hpp"
 #include "embeddedCliEvent.hpp"
 #include "embeddedCliService.hpp"
@@ -28,9 +30,16 @@ static std::array<QP::QEvt const *, 10> cliQueueSto;
 class LinuxCharacterDevice : public cms::interfaces::CharacterDevice
 {
 public:
+    LinuxCharacterDevice() :
+        mCallback(nullptr),
+        mCallbackUserData(nullptr),
+        mReader(&LinuxCharacterDevice::Reader, this)
+    {
+    }
+
     bool WriteAsync(uint8_t byte) override
     {
-        fprintf(stdout,"%c", (char)byte);
+        printf("%c", (char)byte);
         fflush(stdout);
         return true;
     }
@@ -42,8 +51,23 @@ public:
     }
 
 private:
+    void Reader()
+    {
+        char buf;
+        ssize_t result = -1;
+        do
+        {
+            result = read(STDIN_FILENO, &buf, 1);
+            if (mCallback != nullptr)
+            {
+                mCallback(mCallbackUserData, buf);
+            }
+        }  while (result > 0);
+    }
+
     NewByteCallback mCallback = nullptr;
     void* mCallbackUserData = nullptr;
+    std::thread mReader = {};
 };
 
 static void InitFramework()
@@ -52,19 +76,6 @@ static void InitFramework()
     QP::QF::poolInit(smallPoolStorage.data(), sizeof(smallPoolStorage), sizeof(SmallEventElement));
     QP::QF::poolInit(mediumPoolStorage.data(), sizeof(mediumPoolStorage), sizeof(MediumEventElement));
     QP::QActive::psInit(subscriberStorage, Q_DIM(subscriberStorage));
-}
-
-int main()
-{
-    using namespace QP;
-    printf("Hello world\n");
-
-    InitFramework();
-
-    auto cli = new cms::EmbeddedCLI::Service(nullptr, 0, 0, "mae:");
-    cli->start(1, cliQueueSto.data(), cliQueueSto.size(), nullptr, 0);
-    cli->BeginCliAsync(new LinuxCharacterDevice());
-    return QP::QF::run();
 }
 
 extern "C" {
@@ -82,12 +93,10 @@ namespace QP {
 
 void QF::onStartup()
 {
-    printf("%s\n", __FUNCTION__ );
 }
 
 void QF::onCleanup()
 {
-    printf("%s\n", __FUNCTION__ );
 }
 
 void QF::onClockTick() {
@@ -95,3 +104,17 @@ void QF::onClockTick() {
 }
 
 } //namespace QP
+
+
+int main()
+{
+    using namespace QP;
+    printf("Greetings, this is an example of the embedded-cli-for-qpcpp running in Linux\n");
+
+    InitFramework();
+
+    auto cli = new cms::EmbeddedCLI::Service(nullptr, 0, 0, "CLI> ");
+    cli->start(1, cliQueueSto.data(), cliQueueSto.size(), nullptr, 0);
+    cli->BeginCliAsync(new LinuxCharacterDevice());
+    return QP::QF::run();
+}
