@@ -20,8 +20,8 @@ public:
 
     bool WriteAsync(uint8_t byte) override
     {
-        write(STDOUT_FILENO, &byte, 1);
-        return true;
+        ssize_t rtn = write(STDOUT_FILENO, &byte, 1);
+        return rtn == 1;
     }
 
     void RegisterNewByteCallback(NewByteCallback callback, void* userData) override
