@@ -2,10 +2,10 @@
 #include <cstdlib>
 #include <array>
 #include <thread>
-#include <unistd.h>
 #include "qpcpp.hpp"
 #include "embeddedCliEvent.hpp"
 #include "embeddedCliService.hpp"
+#include "linuxCharacterDevice.hpp"
 
 struct SmallEventElement
 {
@@ -26,49 +26,6 @@ static std::array<SmallEventElement, 32> smallPoolStorage;
 static std::array<MediumEventElement, 16> mediumPoolStorage;
 static QP::QSubscrList subscriberStorage[MAX_PUB_SUB_SIG];
 static std::array<QP::QEvt const *, 10> cliQueueSto;
-
-class LinuxCharacterDevice : public cms::interfaces::CharacterDevice
-{
-public:
-    LinuxCharacterDevice() :
-        mCallback(nullptr),
-        mCallbackUserData(nullptr),
-        mReader(&LinuxCharacterDevice::Reader, this)
-    {
-    }
-
-    bool WriteAsync(uint8_t byte) override
-    {
-        printf("%c", (char)byte);
-        fflush(stdout);
-        return true;
-    }
-
-    void RegisterNewByteCallback(NewByteCallback callback, void* userData) override
-    {
-        mCallback = callback;
-        mCallbackUserData = userData;
-    }
-
-private:
-    void Reader()
-    {
-        char buf;
-        ssize_t result = -1;
-        do
-        {
-            result = read(STDIN_FILENO, &buf, 1);
-            if (mCallback != nullptr)
-            {
-                mCallback(mCallbackUserData, buf);
-            }
-        }  while (result > 0);
-    }
-
-    NewByteCallback mCallback = nullptr;
-    void* mCallbackUserData = nullptr;
-    std::thread mReader = {};
-};
 
 static void InitFramework()
 {
