@@ -20,8 +20,7 @@ public:
 
     bool WriteAsync(uint8_t byte) override
     {
-        printf("%c", (char)byte);
-        fflush(stdout);
+        write(STDOUT_FILENO, &byte, 1);
         return true;
     }
 

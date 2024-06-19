@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <array>
 #include <thread>
+#include <termios.h>
 #include "qpcpp.hpp"
 #include "embeddedCliEvent.hpp"
 #include "embeddedCliService.hpp"
@@ -20,7 +21,6 @@ struct MediumEventElement
         std::array<uint8_t, 64> data;
     };
 };
-static_assert(sizeof (cms::EmbeddedCLI::Event) == sizeof(SmallEventElement), "blah");
 
 static std::array<SmallEventElement, 32> smallPoolStorage;
 static std::array<MediumEventElement, 16> mediumPoolStorage;
@@ -34,6 +34,9 @@ static void InitFramework()
     QP::QF::poolInit(mediumPoolStorage.data(), sizeof(mediumPoolStorage), sizeof(MediumEventElement));
     QP::QActive::psInit(subscriberStorage, Q_DIM(subscriberStorage));
 }
+
+static struct termios original_stdin = {};
+static struct termios raw_stdin = {};
 
 extern "C" {
 
@@ -54,6 +57,8 @@ void QF::onStartup()
 
 void QF::onCleanup()
 {
+    // restore terminal settings
+    tcsetattr(STDIN_FILENO, TCSANOW, &original_stdin);
 }
 
 void QF::onClockTick() {
@@ -63,15 +68,36 @@ void QF::onClockTick() {
 } //namespace QP
 
 
+static void onTestCmd(EmbeddedCli* cli, char* args, void* context)
+{
+    (void)cli;
+    (void)args;
+    (void)context;
+    printf("Hello world, from the 'test' command\r\n");
+}
+
 int main()
 {
     using namespace QP;
     printf("Greetings, this is an example of the embedded-cli-for-qpcpp running in Linux\n");
+
+    // Backup the terminal settings, and switch to raw mode
+    tcgetattr(STDIN_FILENO, &original_stdin);
+    raw_stdin = original_stdin;
+    cfmakeraw(&raw_stdin);
+    tcsetattr(STDIN_FILENO, TCSANOW, &raw_stdin);
 
     InitFramework();
 
     auto cli = new cms::EmbeddedCLI::Service(nullptr, 0, 0, "CLI> ");
     cli->start(1, cliQueueSto.data(), cliQueueSto.size(), nullptr, 0);
     cli->BeginCliAsync(new LinuxCharacterDevice());
+    cli->AddCliBindingAsync({
+      "test",
+      "Test Me!",
+      true,
+      nullptr,
+      onTestCmd
+    });
     return QP::QF::run();
 }
