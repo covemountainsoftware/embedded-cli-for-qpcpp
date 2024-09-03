@@ -13,8 +13,7 @@
 /// @endcond
 
 #include "embeddedCliService.hpp"
-#include "embeddedCliEvent.hpp"
-#include "pubsub_signals.hpp"
+#include "cms_pubsub.hpp"
 #include "qsafe.h"
 #include "embedded_cli.h"
 
