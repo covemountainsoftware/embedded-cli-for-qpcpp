@@ -29,7 +29,7 @@ Service::Service(uint64_t* buffer, size_t bufferElementCount, uint16_t maxBindin
     mEmbeddedCliConfigBacking(),
     mEmbeddedCliConfig(reinterpret_cast<EmbeddedCliConfig*>(mEmbeddedCliConfigBacking.data())),
     mEmbeddedCli(nullptr),
-    mActiveEvent(EMBEDDED_CLI_ACTIVE_SIG, this)
+    mActiveEvent(CMS_EMBEDDED_CLI_ACTIVE_SIG, this)
 {
     static_assert(sizeof(mEmbeddedCliConfigBacking) >= sizeof(EmbeddedCliConfig),
                   "backing memory for the cli config is not large enough!");
@@ -79,7 +79,7 @@ Q_STATE_DEF(Service, initial)
 
 Q_STATE_DEF(Service, inactive)
 {
-    static const QP::QEvt inactiveEvent = QP::QEvt(EMBEDDED_CLI_INACTIVE_SIG);
+    static const QP::QEvt inactiveEvent = QP::QEvt(CMS_EMBEDDED_CLI_INACTIVE_SIG);
 
     QP::QState rtn;
     switch (e->sig) {

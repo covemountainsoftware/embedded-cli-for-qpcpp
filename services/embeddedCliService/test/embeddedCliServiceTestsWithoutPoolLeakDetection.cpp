@@ -64,7 +64,7 @@ TEST_GROUP(EmbeddedCliServiceTestsWithoutMemPoolLeakDetect)
                           nullptr, 0U);
         qf_ctrl::ProcessEvents();
         mock().checkExpectations();
-        CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_INACTIVE_SIG));
+        CHECK_TRUE(mRecorder->isSignalRecorded(CMS_EMBEDDED_CLI_INACTIVE_SIG));
     }
 };
 
@@ -112,7 +112,7 @@ TEST(EmbeddedCliServiceTestsWithoutMemPoolLeakDetect, the_service_supports_confi
     mUnderTest->BeginCliAsync(mMockCharacterDevice);
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
-    CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_ACTIVE_SIG));
+    CHECK_TRUE(mRecorder->isSignalRecorded(CMS_EMBEDDED_CLI_ACTIVE_SIG));
 
     mUnderTest->AddCliBindingAsync({
       "testing",

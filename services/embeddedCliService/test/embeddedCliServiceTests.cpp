@@ -71,7 +71,7 @@ TEST_GROUP(EmbeddedCliServiceTests)
                           nullptr, 0U);
         qf_ctrl::ProcessEvents();
         mock().checkExpectations();
-        CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_INACTIVE_SIG));
+        CHECK_TRUE(mRecorder->isSignalRecorded(CMS_EMBEDDED_CLI_INACTIVE_SIG));
     }
 
     void startServiceToActive(const char * customInvitation = nullptr)
@@ -83,7 +83,7 @@ TEST_GROUP(EmbeddedCliServiceTests)
         mUnderTest->BeginCliAsync(mMockCharacterDevice);
         qf_ctrl::ProcessEvents();
         mock().checkExpectations();
-        CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_ACTIVE_SIG));
+        CHECK_TRUE(mRecorder->isSignalRecorded(CMS_EMBEDDED_CLI_ACTIVE_SIG));
     }
 
     static void mockExpectWritesToCharacterDevice(const Bytes& expectedWrites)
@@ -152,7 +152,7 @@ TEST(EmbeddedCliServiceTests, writes_default_prompt_after_default_activation)
 
     //ignore the event, it is now a dynamic event and will create
     //a memory pool leak if not handled or ignored.
-    mRecorder->oneShotIgnoreEvent(EMBEDDED_CLI_ACTIVE_SIG);
+    mRecorder->oneShotIgnoreEvent(CMS_EMBEDDED_CLI_ACTIVE_SIG);
     mUnderTest->BeginCliAsync(mMockCharacterDevice);
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
@@ -169,7 +169,7 @@ TEST(EmbeddedCliServiceTests, publishes_an_event_upon_active)
     mUnderTest->BeginCliAsync(mMockCharacterDevice);
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
-    CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_ACTIVE_SIG));
+    CHECK_TRUE(mRecorder->isSignalRecorded(CMS_EMBEDDED_CLI_ACTIVE_SIG));
 }
 
 TEST(EmbeddedCliServiceTests, service_can_return_to_inactive)
@@ -183,7 +183,7 @@ TEST(EmbeddedCliServiceTests, service_can_return_to_inactive)
     mUnderTest->EndCliAsync();
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
-    CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_INACTIVE_SIG));
+    CHECK_TRUE(mRecorder->isSignalRecorded(CMS_EMBEDDED_CLI_INACTIVE_SIG));
 }
 
 TEST(EmbeddedCliServiceTests, upon_receiving_an_empty_linefeed_will_echo_same_and_prompt)
@@ -218,7 +218,7 @@ TEST(EmbeddedCliServiceTests, service_supports_static_memory_for_the_cli)
     mUnderTest->BeginCliAsync(mMockCharacterDevice);
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
-    CHECK_TRUE(mRecorder->isSignalRecorded(EMBEDDED_CLI_ACTIVE_SIG));
+    CHECK_TRUE(mRecorder->isSignalRecorded(CMS_EMBEDDED_CLI_ACTIVE_SIG));
 }
 
 TEST(EmbeddedCliServiceTests, service_supports_a_custom_invitation)
@@ -381,6 +381,6 @@ TEST(EmbeddedCliServiceTests, the_published_cli_active_event_includes_a_pointer_
     qf_ctrl::ProcessEvents();
     mock().checkExpectations();
     auto event = mRecorder->getRecordedEvent<cms::EmbeddedCLI::Event>();
-    CHECK_EQUAL(EMBEDDED_CLI_ACTIVE_SIG, event->sig);
+    CHECK_EQUAL(CMS_EMBEDDED_CLI_ACTIVE_SIG, event->sig);
     CHECK_EQUAL(mUnderTest, event->mCliService);
 }
