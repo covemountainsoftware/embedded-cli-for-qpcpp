@@ -23,6 +23,7 @@
 #include "characterDeviceInterface.hpp"
 #include "embeddedCliCommandBinding.hpp"
 #include "embeddedCliEvent.hpp"
+#include "cms_embedded_cli_signal_range.hpp"
 
 //forward declare the third-party EmbeddedCli structs
 struct EmbeddedCli;
@@ -96,11 +97,14 @@ public:
 
 private:
     enum InternalSignals {
-        BEGIN_CLI_SIG = MAX_PUB_SUB_SIG,
+        BEGIN_CLI_SIG = CMS_EMBEDDED_CLI_SIGNAL_RANGE_START,
         END_CLI_SIG,
         NEW_CLI_DATA_SIG,
         ADD_CLI_BINDING_SIG,
+        INTERNAL_MAX_SIG
     };
+    static_assert(INTERNAL_MAX_SIG <= CMS_EMBEDDED_CLI_SIGNAL_RANGE_END,
+                  "Assigned signal range must be increased");
 
     class BeginEvent : public QP::QEvt {
     public:
