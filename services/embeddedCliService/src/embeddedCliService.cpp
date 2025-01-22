@@ -22,7 +22,7 @@ Q_DEFINE_THIS_MODULE("EmbeddedCliService")
 namespace cms {
 namespace EmbeddedCLI {
 
-Service::Service(uint64_t* buffer, size_t bufferElementCount, uint16_t maxBindingCount, const char * customInvitation) :
+Service::Service(CliUint * buffer, size_t bufferElementCount, uint16_t maxBindingCount, const char * customInvitation) :
     QP::QActive(initial),
     mCharacterDevice(nullptr),
     mEmbeddedCliConfigBacking(),
@@ -39,7 +39,7 @@ Service::Service(uint64_t* buffer, size_t bufferElementCount, uint16_t maxBindin
 
     if (buffer != nullptr) {
         mEmbeddedCliConfig->cliBuffer = buffer;
-        mEmbeddedCliConfig->cliBufferSize = bufferElementCount * sizeof(uint64_t);
+        mEmbeddedCliConfig->cliBufferSize = bufferElementCount * sizeof(CliUint);
     }
 
     if (customInvitation != nullptr) {
@@ -55,7 +55,7 @@ Service::Service(uint64_t* buffer, size_t bufferElementCount, uint16_t maxBindin
     // only if we are using that option.
     if (buffer != nullptr) {
         uint16_t requiredSize = embeddedCliRequiredSize(mEmbeddedCliConfig);
-        Q_ASSERT(requiredSize <= bufferElementCount * sizeof(uint64_t));
+        Q_ASSERT(requiredSize <= bufferElementCount * sizeof(CliUint));
     }
 }
 

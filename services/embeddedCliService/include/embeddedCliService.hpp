@@ -32,6 +32,19 @@ struct EmbeddedCliConfig;
 namespace cms {
 namespace EmbeddedCLI { //note, all caps CLI needed to avoid conflicts
 
+// used for proper alignment of cli buffer, below
+// matches with embedded cli itself
+#if UINTPTR_MAX == 0xFFFF
+using CliUint = uint16_t;
+#elif UINTPTR_MAX == 0xFFFFFFFF
+using CliUint = uint32_t;
+#elif UINTPTR_MAX == 0xFFFFFFFFFFFFFFFFu
+using CliUint = uint64_t;
+#else
+    #error unsupported pointer size
+#endif
+
+
 /**
  * The EmbeddedCLI::Service creates a command line interface
  * using a provided character device.
@@ -52,7 +65,7 @@ public:
      * @param customInvitation - a custom string for the CLI prompt.
      *                           Set to nullptr for the internal default prompt
      */
-    explicit Service(uint64_t* buffer, size_t bufferElementCount, uint16_t maxBindingCount, const char * customInvitation = nullptr);
+    explicit Service(CliUint* buffer, size_t bufferElementCount, uint16_t maxBindingCount, const char * customInvitation = nullptr);
     ~Service();
 
     Service(const Service&)            = delete;
@@ -67,15 +80,6 @@ public:
      * to the AO to get the CLI up and running.
      *
      * @param charDevice - the character device to use
-     * @param buffer - pointer to a statically allocated buffer using
-     *                 uint64. Must be aligned to uint64 boundaries too.
-     * @param bufferElementCount - the number of uint64 elements
-     *                             available at 'buffer'
-     *
-     * @note: If 'buffer' is nullptr, will use the embedded-cli's default configuration
-     *        which will allocate memory via malloc.
-     * @note: Using uint64 to ensure all embedded-cli alignment requirements
-     *        are met, regardless of environment.
      */
     void BeginCliAsync(cms::interfaces::CharacterDevice* charDevice);
 
