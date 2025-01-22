@@ -41,6 +41,7 @@ be compatible with this code.
   * `git submodule update` 
 * CppUTest (version 3.8-7 or version 4.0) (3.8 is the default in Ubuntu 20.04 while 4.0 is the default in Ubuntu 22.04)
 * This project requires support for C++14 and/or C11.
+* A handy OBJECT cmake library target is provided for integration into higher level projects:  'cms-embedded-cli-service'
 
 ## Continuous Integration
 
