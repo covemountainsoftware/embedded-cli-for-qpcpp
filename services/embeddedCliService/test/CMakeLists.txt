@@ -3,6 +3,7 @@ set(TEST_APP_NAME EmbeddedCliServiceTests)
 
 include_directories(${CMS_CHAR_DEVICE_INCLUDE})
 include_directories(${CMS_MOCK_CHAR_DEVICE_DIR})
+include_directories(../include)
 
 set(TEST_SOURCES
         embeddedCliServiceTests.cpp
