@@ -8,7 +8,7 @@
 #include "mockCharacterDevice.hpp"
 
 // the cpputest headers must always be last
-#include "qassertMockSupport.hpp"
+#include "cmsQAssertMockSupport.hpp"
 #include "CppUTest/TestHarness.h"
 #include "CppUTestExt/MockSupport.h"
 
